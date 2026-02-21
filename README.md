@@ -1,4 +1,4 @@
-# Prescription Manager
+# PharmaSense
 
 A simple app for managing prescriptions.
 
