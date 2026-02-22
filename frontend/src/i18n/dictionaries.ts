@@ -146,6 +146,60 @@ export interface Dictionary {
   analyticsApproved: string;
   analyticsRejected: string;
   analyticsBlocked: string;
+
+  // ── Clinician dashboard ─────────────────────────────────
+  patients: string;
+  recentVisits: string;
+  newVisit: string;
+  allergyCount: string;
+  activePrescriptions: string;
+  completionStatus: string;
+  noPatients: string;
+  noRecentVisits: string;
+
+  // ── Cockpit / AddVisit ──────────────────────────────────
+  cockpitTitle: string;
+  panelNotes: string;
+  panelExtraction: string;
+  panelRecommendations: string;
+  selectPatientPrompt: string;
+  notesPlaceholder: string;
+  extractionEmpty: string;
+  recommendationsEmpty: string;
+  generateRecommendations: string;
+  extractFromNotes: string;
+  visitReason: string;
+
+  // ── Chat ────────────────────────────────────────────────
+  chatTitle: string;
+  chatInputPlaceholder: string;
+  chatSend: string;
+  chatResponseReceived: string;
+  chatTyping: string;
+  chatSuggestRationale: string;
+  chatSuggestCheapest: string;
+  chatSuggestRisks: string;
+  chatSuggestSimplify: string;
+
+  // ── Visit finalization ──────────────────────────────────
+  finalizeVisit: string;
+  finalizeSuccess: string;
+  finalizeAllActioned: string;
+
+  // ── Visit detail ────────────────────────────────────────
+  visitDetailTitle: string;
+  visitDetailDate: string;
+  visitDetailClinician: string;
+  visitDetailPatient: string;
+  visitDetailStatus: string;
+  visitDetailPrescriptions: string;
+  visitDetailViewReceipt: string;
+  visitDetailChat: string;
+  visitDetailReminder: string;
+  visitDetailDownloadPdf: string;
+  visitDetailNoPrescriptions: string;
+  visitCompleted: string;
+  visitInProgress: string;
 }
 
 const en: Dictionary = {
@@ -298,6 +352,60 @@ const en: Dictionary = {
   analyticsApproved: "Approved",
   analyticsRejected: "Rejected",
   analyticsBlocked: "Blocked",
+
+  // Clinician dashboard
+  patients: "Patients",
+  recentVisits: "Recent Visits",
+  newVisit: "+ New Visit",
+  allergyCount: "allergies",
+  activePrescriptions: "active prescriptions",
+  completionStatus: "completed",
+  noPatients: "No patients found.",
+  noRecentVisits: "No recent visits.",
+
+  // Cockpit / AddVisit
+  cockpitTitle: "Live Cockpit",
+  panelNotes: "Notes",
+  panelExtraction: "Extraction",
+  panelRecommendations: "Recommendations",
+  selectPatientPrompt: "Search and select a patient to begin.",
+  notesPlaceholder: "Type visit notes here, or draw on a tablet...",
+  extractionEmpty: "Add visit notes, then click Extract to parse clinical data.",
+  recommendationsEmpty: "Select a patient, add notes, and click Generate Recommendations.",
+  generateRecommendations: "Generate Recommendations",
+  extractFromNotes: "Extract from Notes",
+  visitReason: "Visit Reason",
+
+  // Chat
+  chatTitle: "Talk to Your Prescription",
+  chatInputPlaceholder: "Ask a question about this prescription…",
+  chatSend: "Send",
+  chatResponseReceived: "Response received.",
+  chatTyping: "AI is typing…",
+  chatSuggestRationale: "Why did you choose this alternative?",
+  chatSuggestCheapest: "What is the cheapest covered option?",
+  chatSuggestRisks: "Are there any risks with current medications?",
+  chatSuggestSimplify: "Explain this to the patient simply",
+
+  // Visit finalization
+  finalizeVisit: "Finalize Visit",
+  finalizeSuccess: "Visit finalized. {n} prescriptions approved.",
+  finalizeAllActioned: "All prescriptions must be approved or rejected before finalizing.",
+
+  // Visit detail
+  visitDetailTitle: "Visit Details",
+  visitDetailDate: "Date",
+  visitDetailClinician: "Clinician",
+  visitDetailPatient: "Patient",
+  visitDetailStatus: "Status",
+  visitDetailPrescriptions: "Prescriptions",
+  visitDetailViewReceipt: "View Receipt",
+  visitDetailChat: "Talk to Prescription",
+  visitDetailReminder: "Set Reminder",
+  visitDetailDownloadPdf: "Download PDF",
+  visitDetailNoPrescriptions: "No prescriptions for this visit.",
+  visitCompleted: "Completed",
+  visitInProgress: "In Progress",
 };
 
 const es: Dictionary = {
@@ -451,6 +559,60 @@ const es: Dictionary = {
   analyticsApproved: "Aprobadas",
   analyticsRejected: "Rechazadas",
   analyticsBlocked: "Bloqueadas",
+
+  // Panel del médico
+  patients: "Pacientes",
+  recentVisits: "Visitas Recientes",
+  newVisit: "+ Nueva Visita",
+  allergyCount: "alergias",
+  activePrescriptions: "recetas activas",
+  completionStatus: "completada",
+  noPatients: "No se encontraron pacientes.",
+  noRecentVisits: "No hay visitas recientes.",
+
+  // Cockpit / AddVisit
+  cockpitTitle: "Panel en Vivo",
+  panelNotes: "Notas",
+  panelExtraction: "Extracción",
+  panelRecommendations: "Recomendaciones",
+  selectPatientPrompt: "Busca y selecciona un paciente para comenzar.",
+  notesPlaceholder: "Escribe notas de visita aquí, o dibuja en una tableta...",
+  extractionEmpty: "Agrega notas de visita, luego haz clic en Extraer para analizar datos clínicos.",
+  recommendationsEmpty: "Selecciona un paciente, agrega notas y haz clic en Generar Recomendaciones.",
+  generateRecommendations: "Generar Recomendaciones",
+  extractFromNotes: "Extraer de Notas",
+  visitReason: "Motivo de Visita",
+
+  // Chat
+  chatTitle: "Habla con tu Receta",
+  chatInputPlaceholder: "Haz una pregunta sobre esta receta…",
+  chatSend: "Enviar",
+  chatResponseReceived: "Respuesta recibida.",
+  chatTyping: "La IA está escribiendo…",
+  chatSuggestRationale: "¿Por qué elegiste esta alternativa?",
+  chatSuggestCheapest: "¿Cuál es la opción cubierta más económica?",
+  chatSuggestRisks: "¿Hay riesgos con los medicamentos actuales?",
+  chatSuggestSimplify: "Explica esto al paciente de forma sencilla",
+
+  // Finalización de visita
+  finalizeVisit: "Finalizar Visita",
+  finalizeSuccess: "Visita finalizada. {n} recetas aprobadas.",
+  finalizeAllActioned: "Todas las recetas deben ser aprobadas o rechazadas antes de finalizar.",
+
+  // Detalle de visita
+  visitDetailTitle: "Detalles de Visita",
+  visitDetailDate: "Fecha",
+  visitDetailClinician: "Médico",
+  visitDetailPatient: "Paciente",
+  visitDetailStatus: "Estado",
+  visitDetailPrescriptions: "Recetas",
+  visitDetailViewReceipt: "Ver Recibo",
+  visitDetailChat: "Hablar con la Receta",
+  visitDetailReminder: "Establecer Recordatorio",
+  visitDetailDownloadPdf: "Descargar PDF",
+  visitDetailNoPrescriptions: "No hay recetas para esta visita.",
+  visitCompleted: "Completada",
+  visitInProgress: "En Progreso",
 };
 
 export const dictionaries = { en, es } as const;

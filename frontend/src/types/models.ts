@@ -35,6 +35,9 @@ export interface Visit {
   notes: string;
   extractedData: ExtractedData | null;
   createdAt: string;
+  patientName?: string;
+  reason?: string;
+  prescriptionCount?: number;
 }
 
 export interface RecommendedDrug {
@@ -60,10 +63,26 @@ export interface AlternativeDrug {
   estimatedCopay: number | null;
 }
 
+export type RecommendationLabel =
+  | "BEST_COVERED"
+  | "CHEAPEST"
+  | "CLINICAL_BACKUP";
+
+export type CoverageStatus =
+  | "COVERED"
+  | "NOT_COVERED"
+  | "PRIOR_AUTH_REQUIRED"
+  | "UNKNOWN";
+
 export interface RecommendationOption {
+  label?: RecommendationLabel;
   primary: RecommendedDrug;
   alternatives: AlternativeDrug[];
   warnings: string[];
+  safetyChecks?: SafetyCheck[];
+  blocked?: boolean;
+  blockReason?: string;
+  rationale?: string;
 }
 
 export interface SafetyCheck {

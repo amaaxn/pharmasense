@@ -4,6 +4,7 @@ import { LandingPage } from "../pages/LandingPage";
 import { LoginPage } from "../pages/LoginPage";
 import { PatientDashboard } from "../pages/PatientDashboard";
 import { ClinicianDashboard } from "../pages/ClinicianDashboard";
+import { DrawingPage } from "../pages/DrawingPage";
 import { VisitPage } from "../pages/VisitPage";
 import { VisitChatPage } from "../pages/VisitChatPage";
 import { AnalyticsPage } from "../pages/AnalyticsPage";
@@ -14,6 +15,7 @@ export function AppRoutes() {
       {/* Public */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/draw/:channelId" element={<DrawingPage />} />
 
       {/* Patient-only */}
       <Route

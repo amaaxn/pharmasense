@@ -1,91 +1,32 @@
 import { create } from "zustand";
-import apiClient from "../api/client";
+import {
+  recommend as apiRecommend,
+  approve as apiApprove,
+  reject as apiReject,
+  getReceipt as apiGetReceipt,
+  generatePatientPack as apiGeneratePatientPack,
+} from "../api/prescriptions";
 
-// ── Types ───────────────────────────────────────────────────
+// Re-export types from api/prescriptions so existing consumers don't break
+export type {
+  RecommendedDrug,
+  AlternativeDrug,
+  SafetyCheck,
+  RecommendationLabel,
+  CoverageStatus,
+  RecommendationOption,
+  ReceiptDrugItem,
+  PrescriptionReceipt,
+  PatientPack,
+} from "../api/prescriptions";
 
-export interface RecommendedDrug {
-  drugName: string;
-  genericName: string;
-  dosage: string;
-  frequency: string;
-  duration: string;
-  route: string;
-  rationale: string;
-  tier: number | null;
-  estimatedCopay: number | null;
-  isCovered: boolean | null;
-  requiresPriorAuth: boolean | null;
-}
+import type {
+  RecommendationOption,
+  PrescriptionReceipt,
+  PatientPack,
+} from "../api/prescriptions";
 
-export interface AlternativeDrug {
-  drugName: string;
-  genericName: string;
-  dosage: string;
-  reason: string;
-  tier: number | null;
-  estimatedCopay: number | null;
-}
-
-export interface SafetyCheck {
-  checkType: string;
-  passed: boolean;
-  severity: string | null;
-  message: string;
-}
-
-export interface RecommendationOption {
-  primary: RecommendedDrug;
-  alternatives: AlternativeDrug[];
-  warnings: string[];
-}
-
-export interface ReceiptDrugItem {
-  drugName: string;
-  genericName: string;
-  dosage: string;
-  frequency: string;
-  duration: string;
-  route: string;
-  tier: number | null;
-  copay: number | null;
-  isCovered: boolean;
-  requiresPriorAuth: boolean;
-}
-
-export interface PrescriptionReceipt {
-  receiptId: string;
-  prescriptionId: string;
-  visitId: string;
-  patientId: string;
-  clinicianId: string;
-  patientName: string;
-  clinicianName: string;
-  issuedAt: string;
-  status: string;
-  drugs: ReceiptDrugItem[];
-  safety: {
-    allPassed: boolean;
-    checks: SafetyCheck[];
-    allergyFlags: string[];
-    interactionFlags: string[];
-    doseRangeFlags: string[];
-  };
-  coverage: {
-    planName: string;
-    memberId: string;
-    totalCopay: number;
-    itemsCovered: number;
-    itemsNotCovered: number;
-    priorAuthRequired: string[];
-  };
-  notes: string | null;
-}
-
-export interface PatientPack {
-  instructions: string;
-  warnings: string[];
-  medicationSchedule: string | null;
-}
+// ── Store-only types ────────────────────────────────────────
 
 export type PrescriptionStatus =
   | "idle"
@@ -144,7 +85,7 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   fetchRecommendations: async (req) => {
     set({ isLoading: true, error: null, status: "loading", options: [] });
     try {
-      const data = await apiClient.post("/prescriptions/recommend", {
+      const resp = await apiRecommend({
         visit_id: req.visitId,
         chief_complaint: req.chiefComplaint,
         patient_id: req.patientId,
@@ -152,10 +93,6 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
         allergies: req.allergies,
         notes: req.notes,
       });
-      const resp = data as unknown as {
-        recommendations: RecommendationOption[];
-        reasoning_summary?: string;
-      };
       set({
         options: resp.recommendations ?? [],
         reasoningSummary: resp.reasoning_summary ?? null,
@@ -174,12 +111,11 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   approveOption: async (prescriptionId, confirmedSafetyReview, comment) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.post("/prescriptions/approve", {
+      const receipt = await apiApprove({
         prescription_id: prescriptionId,
         confirmed_safety_review: confirmedSafetyReview,
         comment,
       });
-      const receipt = data as unknown as PrescriptionReceipt;
       set({
         prescriptionId,
         receipt,
@@ -200,7 +136,7 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   rejectOption: async (prescriptionId, reason) => {
     set({ isLoading: true, error: null });
     try {
-      await apiClient.post("/prescriptions/reject", {
+      await apiReject({
         prescription_id: prescriptionId,
         reason,
       });
@@ -218,10 +154,8 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   fetchReceipt: async (prescriptionId) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.get(
-        `/prescriptions/${prescriptionId}/receipt`,
-      );
-      set({ receipt: data as unknown as PrescriptionReceipt, isLoading: false });
+      const receipt = await apiGetReceipt(prescriptionId);
+      set({ receipt, isLoading: false });
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
     }
@@ -230,10 +164,8 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   generatePatientPack: async (prescriptionId) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.post(
-        `/prescriptions/${prescriptionId}/patient-pack`,
-      );
-      set({ patientPack: data as unknown as PatientPack, isLoading: false });
+      const patientPack = await apiGeneratePatientPack(prescriptionId);
+      set({ patientPack, isLoading: false });
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
     }

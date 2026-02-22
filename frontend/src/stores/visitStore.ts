@@ -1,24 +1,16 @@
 import { create } from "zustand";
-import apiClient from "../api/client";
+import {
+  listVisits as apiListVisits,
+  getVisit as apiGetVisit,
+  createVisit as apiCreateVisit,
+  updateVisit as apiUpdateVisit,
+  extractVisitData as apiExtractVisitData,
+} from "../api/visits";
 
-// ── Types ───────────────────────────────────────────────────
+// Re-export types from api/visits so existing consumers don't break
+export type { ExtractedData, Visit } from "../api/visits";
 
-export interface ExtractedData {
-  chiefComplaint: string;
-  currentMedications: string[];
-  allergies: string[];
-  diagnosis: string;
-}
-
-export interface Visit {
-  id: string;
-  patientId: string;
-  clinicianId: string;
-  status: "in_progress" | "completed" | "cancelled";
-  notes: string;
-  extractedData: ExtractedData | null;
-  createdAt: string;
-}
+import type { ExtractedData, Visit } from "../api/visits";
 
 export interface VisitFormState {
   patientId: string;
@@ -46,9 +38,11 @@ interface VisitState {
   form: VisitFormState;
   isLoading: boolean;
   isExtracting: boolean;
+  isProcessingDrawing: boolean;
+  drawingChannelId: string | null;
   error: string | null;
 
-  fetchVisits: () => Promise<void>;
+  fetchVisits: (params?: { limit?: number }) => Promise<void>;
   fetchVisit: (id: string) => Promise<void>;
   createVisit: () => Promise<string>;
   updateVisit: (id: string, payload: Partial<Visit>) => Promise<void>;
@@ -58,6 +52,10 @@ interface VisitState {
     key: K,
     value: VisitFormState[K],
   ) => void;
+  setDrawingChannelId: (id: string | null) => void;
+  setProcessingDrawing: (val: boolean) => void;
+  mergeExtractedFields: (fields: Partial<ExtractedData>) => void;
+  updateExtractedData: (data: ExtractedData) => void;
   resetVisitForm: () => void;
   reset: () => void;
 }
@@ -68,12 +66,14 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
   form: { ...EMPTY_FORM },
   isLoading: false,
   isExtracting: false,
+  isProcessingDrawing: false,
+  drawingChannelId: null,
   error: null,
 
-  fetchVisits: async () => {
+  fetchVisits: async (params) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.get("/visits") as unknown as Visit[];
+      const data = await apiListVisits(params);
       set({ visits: data, isLoading: false });
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
@@ -83,7 +83,7 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
   fetchVisit: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.get(`/visits/${id}`) as unknown as Visit;
+      const data = await apiGetVisit(id);
       set({ currentVisit: data, isLoading: false });
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
@@ -94,7 +94,7 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
     const { form } = get();
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.post("/visits", {
+      const visit = await apiCreateVisit({
         patient_id: form.patientId,
         notes: form.notes,
         chief_complaint: form.chiefComplaint,
@@ -102,7 +102,6 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
         allergies: form.allergies,
         diagnosis: form.diagnosis,
       });
-      const visit = data as unknown as Visit;
       set((s) => ({
         visits: [...s.visits, visit],
         currentVisit: visit,
@@ -119,7 +118,7 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
   updateVisit: async (id, payload) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.put(`/visits/${id}`, payload) as unknown as Visit;
+      const data = await apiUpdateVisit(id, payload);
       set((s) => ({
         currentVisit: data,
         visits: s.visits.map((v) => (v.id === id ? data : v)),
@@ -135,8 +134,7 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
     if (!visit) return;
     set({ isExtracting: true, error: null });
     try {
-      const data = await apiClient.post(`/visits/${visit.id}/extract`);
-      const extracted = data as unknown as ExtractedData;
+      const extracted = await apiExtractVisitData(visit.id);
       set((s) => ({
         currentVisit: s.currentVisit
           ? { ...s.currentVisit, extractedData: extracted }
@@ -177,6 +175,66 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
     set((s) => ({ form: { ...s.form, [key]: value } }));
   },
 
+  setDrawingChannelId: (id) => {
+    set({ drawingChannelId: id });
+  },
+
+  setProcessingDrawing: (val) => {
+    set({ isProcessingDrawing: val });
+  },
+
+  mergeExtractedFields: (fields) => {
+    set((s) => {
+      const current = s.currentVisit?.extractedData;
+      if (!current) return s;
+
+      const merged: ExtractedData = {
+        ...current,
+        allergies: fields.allergies
+          ? Array.from(new Set([...current.allergies, ...fields.allergies]))
+          : current.allergies,
+        currentMedications: fields.currentMedications
+          ? Array.from(
+              new Set([
+                ...current.currentMedications,
+                ...fields.currentMedications,
+              ]),
+            )
+          : current.currentMedications,
+        chiefComplaint: fields.chiefComplaint || current.chiefComplaint,
+        diagnosis: fields.diagnosis || current.diagnosis,
+      };
+
+      return {
+        currentVisit: s.currentVisit
+          ? { ...s.currentVisit, extractedData: merged }
+          : null,
+        form: {
+          ...s.form,
+          allergies: merged.allergies,
+          currentMedications: merged.currentMedications,
+          chiefComplaint: merged.chiefComplaint,
+          diagnosis: merged.diagnosis,
+        },
+      };
+    });
+  },
+
+  updateExtractedData: (data) => {
+    set((s) => ({
+      currentVisit: s.currentVisit
+        ? { ...s.currentVisit, extractedData: data }
+        : null,
+      form: {
+        ...s.form,
+        chiefComplaint: data.chiefComplaint,
+        currentMedications: data.currentMedications,
+        allergies: data.allergies,
+        diagnosis: data.diagnosis,
+      },
+    }));
+  },
+
   resetVisitForm: () => {
     set({ form: { ...EMPTY_FORM } });
   },
@@ -188,6 +246,8 @@ export const useVisitStore = create<VisitState>()((set, get) => ({
       form: { ...EMPTY_FORM },
       isLoading: false,
       isExtracting: false,
+      isProcessingDrawing: false,
+      drawingChannelId: null,
       error: null,
     });
   },
