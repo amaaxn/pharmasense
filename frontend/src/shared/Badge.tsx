@@ -12,7 +12,6 @@ export type BadgeVariant =
 export interface BadgeProps {
   variant: BadgeVariant;
   children: ReactNode;
-  /** For safety-pass: checklist items shown in popover on click */
   safetyCheckDetails?: { checkType: string; passed: boolean; message: string }[];
   className?: string;
 }
@@ -22,33 +21,33 @@ const variantConfig: Record<
   { bg: string; text: string; icon: string }
 > = {
   "safety-pass": {
-    bg: "bg-safety-pass/15",
-    text: "text-safety-pass",
+    bg: "bg-ps-green/12 ring-1 ring-ps-green/20",
+    text: "text-ps-green",
     icon: "✓",
   },
   "safety-fail": {
-    bg: "bg-safety-fail/15",
-    text: "text-safety-fail",
+    bg: "bg-ps-red/12 ring-1 ring-ps-red/20",
+    text: "text-ps-red",
     icon: "✕",
   },
   "safety-warn": {
-    bg: "bg-safety-warn/15",
-    text: "text-safety-warn",
+    bg: "bg-ps-amber/12 ring-1 ring-ps-amber/20",
+    text: "text-ps-amber",
     icon: "⚠",
   },
   "status-blocked": {
-    bg: "bg-accent-red/15",
-    text: "text-accent-red",
+    bg: "bg-ps-red/12 ring-1 ring-ps-red/20",
+    text: "text-ps-red",
     icon: "🚫",
   },
   "status-approved": {
-    bg: "bg-accent-green/15",
-    text: "text-accent-green",
+    bg: "bg-ps-green/12 ring-1 ring-ps-green/20",
+    text: "text-ps-green",
     icon: "✓",
   },
   ai: {
-    bg: "bg-accent-purple/15",
-    text: "text-accent-purple",
+    bg: "bg-primary/12 ring-1 ring-primary/20",
+    text: "text-primary",
     icon: "✦",
   },
 };
@@ -88,11 +87,7 @@ export function Badge({
       <span
         role={isSafetyPassWithDetails ? "button" : undefined}
         tabIndex={isSafetyPassWithDetails ? 0 : undefined}
-        onClick={
-          isSafetyPassWithDetails
-            ? () => setPopoverOpen((o) => !o)
-            : undefined
-        }
+        onClick={isSafetyPassWithDetails ? () => setPopoverOpen((o) => !o) : undefined}
         onKeyDown={
           isSafetyPassWithDetails
             ? (e) => {
@@ -124,23 +119,15 @@ export function Badge({
           ref={popoverRef}
           role="dialog"
           aria-label="Safety check details"
-          className="absolute left-0 top-full z-50 mt-2 min-w-[220px] rounded-lg border border-border-default bg-bg-card p-3 shadow-modal"
+          className="absolute left-0 top-full z-50 mt-2 min-w-[220px] glass-card rounded-xl p-3 shadow-modal"
         >
-          <p className="mb-2 text-xs font-semibold text-text-secondary">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Safety checks
           </p>
           <ul className="space-y-1.5">
             {safetyCheckDetails.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-xs text-text-primary"
-              >
-                <span
-                  className={
-                    item.passed ? "text-safety-pass" : "text-safety-fail"
-                  }
-                  aria-hidden
-                >
+              <li key={i} className="flex items-start gap-2 text-xs text-foreground">
+                <span className={item.passed ? "text-ps-green" : "text-ps-red"} aria-hidden>
                   {item.passed ? "✓" : "✕"}
                 </span>
                 <span>

@@ -7,7 +7,11 @@ export interface Patient {
   lastName: string;
   dateOfBirth: string;
   allergies: string[];
+  currentMedications: string[];
   insurancePlan: string | null;
+  insuranceMemberId: string | null;
+  medicalHistory: string | null;
+  createdAt: string;
 }
 
 function normalizePatient(raw: unknown): Patient {
@@ -15,6 +19,10 @@ function normalizePatient(raw: unknown): Patient {
   return {
     ...p,
     allergies: Array.isArray(p.allergies) ? (p.allergies as string[]) : [],
+    currentMedications: Array.isArray(p.currentMedications) ? (p.currentMedications as string[]) : [],
+    insuranceMemberId: (p.insuranceMemberId as string) ?? null,
+    medicalHistory: (p.medicalHistory as string) ?? null,
+    createdAt: (p.createdAt as string) ?? "",
   } as Patient;
 }
 
@@ -39,4 +47,8 @@ export async function updatePatient(
 ): Promise<Patient> {
   const raw = await apiClient.put(`/patients/${patientId}`, data);
   return normalizePatient(raw);
+}
+
+export async function deletePatient(patientId: string): Promise<void> {
+  await apiClient.delete(`/patients/${patientId}`);
 }

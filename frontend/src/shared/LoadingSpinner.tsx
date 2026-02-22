@@ -20,7 +20,7 @@ export function LoadingSpinner({
   const spinner = (
     <div
       className={[
-        "animate-spin rounded-full border-current border-t-transparent",
+        "animate-spin rounded-full border-primary border-t-transparent",
         sizeClasses[size],
         className,
       ]
@@ -34,7 +34,7 @@ export function LoadingSpinner({
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary/80">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
         {spinner}
       </div>
     );

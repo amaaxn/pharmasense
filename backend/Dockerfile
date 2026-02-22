@@ -1,9 +1,11 @@
 # =============================================================================
-# PharmaSense V2 — Multi-stage Dockerfile (Part 6 §5.3)
+# PharmaSense — Multi-stage Dockerfile
 #
 # Stage 1: Node — build frontend (Vite)
 # Stage 2: Python builder — install backend deps
 # Stage 3: Final slim image — copy everything, run uvicorn
+#
+# Works with DigitalOcean App Platform (respects $PORT env var).
 # =============================================================================
 
 # ── Stage 1: Frontend build ──────────────────────────────────────────────────
@@ -55,9 +57,11 @@ COPY --from=frontend /frontend/dist/ ./static/
 RUN chown -R pharmasense:pharmasense /app
 USER pharmasense
 
+ENV PORT=8080
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8080/api/health || exit 1
+    CMD curl -f http://localhost:${PORT}/api/health || exit 1
 
-CMD ["uvicorn", "pharmasense.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Shell form so $PORT is expanded at runtime (App Platform injects PORT)
+CMD uvicorn pharmasense.main:app --host 0.0.0.0 --port ${PORT}

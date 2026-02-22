@@ -79,6 +79,7 @@ async def create_visit(
 
 @router.get("")
 async def list_visits(
+    patient_id: str | None = None,
     user: AuthenticatedUser = Depends(get_current_user),
     supa: SupabaseClient = Depends(get_supabase),
 ) -> ApiResponse[list]:
@@ -86,7 +87,10 @@ async def list_visits(
         clinician = await supa.select_one("clinicians", filters={"user_id": f"eq.{user.user_id}"})
         if not clinician:
             return ApiResponse.ok([])
-        rows = await supa.select("visits", filters={"clinician_id": f"eq.{clinician['id']}"}, order="created_at.desc")
+        filters: dict = {"clinician_id": f"eq.{clinician['id']}"}
+        if patient_id:
+            filters["patient_id"] = f"eq.{patient_id}"
+        rows = await supa.select("visits", filters=filters, order="created_at.desc")
     else:
         patient = await supa.select_one("patients", filters={"user_id": f"eq.{user.user_id}"})
         if not patient:

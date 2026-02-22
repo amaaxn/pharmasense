@@ -1,33 +1,20 @@
-import { motion } from "framer-motion";
-import { useReducedMotion } from "../utils/useReducedMotion";
-import { slideUp, ANIMATION_DURATION } from "../utils/animations";
+import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
 
-export interface PageTransitionProps {
-  children: ReactNode;
-  className?: string;
-}
+const variants: Variants = {
+  initial: { opacity: 0, y: 12, filter: "blur(4px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  exit: { opacity: 0, y: -8, filter: "blur(4px)" },
+};
 
-/**
- * Wraps page content for consistent entrance animation (§9.3).
- * Uses slideUp; respects reduced motion (instant when enabled).
- */
-export function PageTransition({ children, className = "" }: PageTransitionProps) {
-  const reduced = useReducedMotion();
-
+export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={
-        reduced
-          ? { hidden: { opacity: 1 }, visible: { opacity: 1 } }
-          : slideUp
-      }
-      transition={
-        reduced ? { duration: 0 } : { duration: ANIMATION_DURATION.pageEntrance }
-      }
-      className={className}
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
     >
       {children}
     </motion.div>

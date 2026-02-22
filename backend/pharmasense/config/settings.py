@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # Gemini AI
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-flash-lite-latest"
+    gemini_model: str = "gemini-2.5-flash"
     gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta/models/"
 
     # ElevenLabs

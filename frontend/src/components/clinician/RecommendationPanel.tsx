@@ -8,6 +8,7 @@ export interface RecommendationPanelProps {
   recommendations: RecommendationOption[];
   isLoading: boolean;
   error: string | null;
+  approvalError?: string | null;
   onGenerate: () => void;
   onRetry: () => void;
   onApprove: (index: number, comment: string) => Promise<void>;
@@ -23,6 +24,7 @@ export function RecommendationPanel({
   recommendations,
   isLoading,
   error,
+  approvalError,
   onGenerate,
   onRetry,
   onApprove,
@@ -120,6 +122,11 @@ export function RecommendationPanel({
           <span className="text-xs text-text-secondary">
             Showing cached recommendations — AI service unavailable
           </span>
+        </div>
+      )}
+      {approvalError && (
+        <div className="mb-3 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2">
+          <span className="text-sm text-destructive">{approvalError}</span>
         </div>
       )}
       <ThreeLaneReview

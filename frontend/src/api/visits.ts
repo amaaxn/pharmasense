@@ -33,8 +33,11 @@ export interface CreateVisitPayload {
 
 // ── API functions ─────────────────────────────────────────
 
-export async function listVisits(params?: { limit?: number }): Promise<Visit[]> {
-  const query = params?.limit ? `?limit=${params.limit}` : "";
+export async function listVisits(params?: { limit?: number; patientId?: string }): Promise<Visit[]> {
+  const qs = new URLSearchParams();
+  if (params?.limit) qs.set("limit", String(params.limit));
+  if (params?.patientId) qs.set("patient_id", params.patientId);
+  const query = qs.toString() ? `?${qs.toString()}` : "";
   return await apiClient.get(`/visits${query}`) as unknown as Visit[];
 }
 

@@ -12,3 +12,8 @@ class VoiceRequest(BaseModel):
 class VoiceResponse(BaseModel):
     audio_url: str
     prescription_id: str
+
+
+class TTSRequest(BaseModel):
+    text: str
+    language: str = "en"

@@ -15,7 +15,7 @@ export function ErrorBanner({
     <div
       role="alert"
       className={[
-        "flex items-center justify-between gap-4 rounded-lg border border-accent-red/50 bg-accent-red/10 px-4 py-3 text-accent-red",
+        "flex items-center justify-between gap-4 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive",
         className,
       ]
         .filter(Boolean)
@@ -27,7 +27,7 @@ export function ErrorBanner({
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
-          className="shrink-0 rounded p-1 hover:bg-accent-red/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+          className="shrink-0 rounded-lg p-1 hover:bg-destructive/20"
         >
           ✕
         </button>

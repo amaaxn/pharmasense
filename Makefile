@@ -83,6 +83,27 @@ migrate: ## Run Alembic migrations (upgrade head)
 migrate-generate: ## Auto-generate a new Alembic migration
 	cd $(BACKEND_DIR) && $(VENV)/alembic revision --autogenerate -m "$(msg)"
 
+# ── 9.4 DigitalOcean App Platform ──────────────────────────────────
+
+.PHONY: deploy-create
+deploy-create: ## Create a new App Platform app from spec
+	doctl apps create --spec .do/app.yaml --wait
+
+.PHONY: deploy-update
+deploy-update: ## Update the App Platform app spec (requires APP_ID)
+	@test -n "$(APP_ID)" || (echo "Usage: make deploy-update APP_ID=<uuid>" && exit 1)
+	doctl apps update $(APP_ID) --spec .do/app.yaml --wait
+
+.PHONY: deploy-info
+deploy-info: ## Show App Platform app info (requires APP_ID)
+	@test -n "$(APP_ID)" || (echo "Usage: make deploy-info APP_ID=<uuid>" && exit 1)
+	doctl apps get $(APP_ID)
+
+.PHONY: deploy-logs
+deploy-logs: ## Tail App Platform logs (requires APP_ID)
+	@test -n "$(APP_ID)" || (echo "Usage: make deploy-logs APP_ID=<uuid>" && exit 1)
+	doctl apps logs $(APP_ID) --follow --type run
+
 # ── Utilities ─────────────────────────────────────────────────────────
 
 .PHONY: check
@@ -94,6 +115,10 @@ check: ## Type-check both backend and frontend
 clean: ## Remove build artifacts
 	rm -rf $(FRONTEND_DIR)/dist $(BACKEND_DIR)/static
 	find $(BACKEND_DIR) -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+
+.PHONY: clean-deps
+clean-deps: ## Remove all installed dependencies (venv + node_modules)
+	rm -rf $(BACKEND_DIR)/.venv $(FRONTEND_DIR)/node_modules
 
 .PHONY: help
 help: ## Show this help

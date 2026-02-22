@@ -1,0 +1,120 @@
+# =============================================================================
+# PharmaSense — DigitalOcean App Platform Spec
+#
+# Deploy:  doctl apps create --spec .do/app.yaml
+# Update:  doctl apps update <app-id> --spec .do/app.yaml
+#
+# All sensitive env vars (API keys, DB credentials) should be set in the
+# DigitalOcean console or via `doctl` — they are NOT stored here.
+# =============================================================================
+
+spec:
+  name: pharmasense
+  region: nyc
+
+  services:
+    - name: pharmasense
+      github:
+        repo: amaaxn/prescription-manager
+        branch: main
+        deploy_on_push: true
+      dockerfile_path: backend/Dockerfile
+      source_dir: /
+      http_port: 8080
+      instance_size_slug: professional-xs
+      instance_count: 1
+      health_check:
+        http_path: /api/health
+        initial_delay_seconds: 15
+        period_seconds: 30
+        timeout_seconds: 5
+        failure_threshold: 3
+      routes:
+        - path: /
+      envs:
+        # Non-secret defaults — override in DO console as needed
+        - key: ENVIRONMENT
+          value: production
+          scope: RUN_TIME
+        - key: CORS_ORIGINS
+          value: '["https://pharmasense.com"]'
+          scope: RUN_TIME
+
+        # ── Secrets (set values in DO console, not here) ──
+        - key: DATABASE_URL
+          type: SECRET
+          scope: RUN_TIME
+        - key: SUPABASE_URL
+          type: SECRET
+          scope: RUN_TIME
+        - key: SUPABASE_ANON_KEY
+          type: SECRET
+          scope: RUN_TIME
+        - key: SUPABASE_SERVICE_ROLE_KEY
+          type: SECRET
+          scope: RUN_TIME
+        - key: SUPABASE_JWT_SECRET
+          type: SECRET
+          scope: RUN_TIME
+        - key: GEMINI_API_KEY
+          type: SECRET
+          scope: RUN_TIME
+        - key: GEMINI_MODEL
+          value: gemini-2.5-flash
+          scope: RUN_TIME
+        - key: ELEVENLABS_API_KEY
+          type: SECRET
+          scope: RUN_TIME
+        - key: SNOWFLAKE_ACCOUNT
+          type: SECRET
+          scope: RUN_TIME
+        - key: SNOWFLAKE_USER
+          type: SECRET
+          scope: RUN_TIME
+        - key: SNOWFLAKE_PASSWORD
+          type: SECRET
+          scope: RUN_TIME
+        - key: SNOWFLAKE_DATABASE
+          value: PHARMASENSE
+          scope: RUN_TIME
+        - key: SNOWFLAKE_SCHEMA
+          value: ANALYTICS
+          scope: RUN_TIME
+        - key: SNOWFLAKE_WAREHOUSE
+          value: PHARMASENSE_WH
+          scope: RUN_TIME
+        - key: SNOWFLAKE_ROLE
+          value: ACCOUNTADMIN
+          scope: RUN_TIME
+        - key: SPACES_ENDPOINT
+          value: https://nyc3.digitaloceanspaces.com
+          scope: RUN_TIME
+        - key: SPACES_REGION
+          value: nyc3
+          scope: RUN_TIME
+        - key: SPACES_BUCKET
+          value: pharmasense-assets
+          scope: RUN_TIME
+        - key: SPACES_ACCESS_KEY
+          type: SECRET
+          scope: RUN_TIME
+        - key: SPACES_SECRET_KEY
+          type: SECRET
+          scope: RUN_TIME
+
+  # Pre-deploy job: run Alembic migrations before each deploy
+  jobs:
+    - name: migrate
+      kind: PRE_DEPLOY
+      github:
+        repo: amaaxn/prescription-manager
+        branch: main
+      dockerfile_path: backend/Dockerfile
+      source_dir: /
+      instance_size_slug: professional-xs
+      instance_count: 1
+      run_command: alembic upgrade head
+      envs:
+        - key: DATABASE_URL
+          type: SECRET
+          scope: RUN_TIME

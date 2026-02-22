@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import date
 from typing import Any
@@ -7,6 +8,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from pharmasense.dependencies.auth import AuthenticatedUser, get_current_user, require_role
 from pharmasense.schemas.common import ApiResponse
 from pharmasense.services.supabase_client import SupabaseClient, get_supabase
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/patients", tags=["patients"])
 
@@ -19,7 +22,11 @@ def _serialize(row: dict, email: str = "") -> dict:
         "lastName": row.get("last_name", ""),
         "dateOfBirth": row.get("date_of_birth", ""),
         "allergies": row.get("allergies") or [],
+        "currentMedications": row.get("current_medications") or [],
         "insurancePlan": row.get("insurance_plan") or None,
+        "insuranceMemberId": row.get("insurance_member_id") or None,
+        "medicalHistory": row.get("medical_history") or None,
+        "createdAt": row.get("created_at", ""),
     }
 
 
@@ -47,10 +54,13 @@ async def get_patient(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid patient ID")
 
-    row = await _find_patient(supa, patient_id)
+    # Look up by table primary key first (clinician flow), then by user_id (patient flow)
+    row = await supa.select_one("patients", filters={"id": f"eq.{patient_id}"})
+    if row is None:
+        row = await _find_patient(supa, patient_id)
 
     if row is None:
-        # Auto-create a skeleton record on first login
+        # Auto-create a skeleton record on first login (patient self-access)
         row = await supa.insert("patients", {
             "user_id": patient_id,
             "first_name": "",
@@ -100,3 +110,38 @@ async def update_patient(
         row = await supa.update("patients", filters={"user_id": f"eq.{patient_id}"}, data=updates)
 
     return ApiResponse.ok(_serialize(row, user.email))
+
+
+@router.delete("/{patient_id}")
+async def delete_patient(
+    patient_id: str,
+    user: AuthenticatedUser = Depends(require_role("clinician")),
+    supa: SupabaseClient = Depends(get_supabase),
+) -> ApiResponse[dict]:
+    try:
+        uuid.UUID(patient_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid patient ID")
+
+    row = await supa.select_one("patients", filters={"id": f"eq.{patient_id}"})
+    if row is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    patient_pk = row["id"]
+
+    # Cascade: delete prescription_items -> prescriptions -> visits -> patient
+    try:
+        visit_rows = await supa.select("visits", columns="id", filters={"patient_id": f"eq.{patient_pk}"})
+        for v in visit_rows:
+            vid = v["id"]
+            prx_rows = await supa.select("prescriptions", columns="id", filters={"visit_id": f"eq.{vid}"})
+            for prx in prx_rows:
+                await supa.delete("prescription_items", filters={"prescription_id": f"eq.{prx['id']}"})
+            await supa.delete("prescriptions", filters={"visit_id": f"eq.{vid}"})
+        await supa.delete("visits", filters={"patient_id": f"eq.{patient_pk}"})
+        await supa.delete("patients", filters={"id": f"eq.{patient_pk}"})
+    except Exception as exc:
+        logger.exception("Failed to delete patient %s", patient_id)
+        raise HTTPException(status_code=500, detail=f"Delete failed: {exc}")
+
+    return ApiResponse.ok({"deleted": patient_id})

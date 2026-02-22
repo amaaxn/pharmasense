@@ -385,6 +385,8 @@ describe("§5.4 prescriptionStore", () => {
         safety: { allPassed: true, checks: [], allergyFlags: [], interactionFlags: [], doseRangeFlags: [] },
         coverage: { planName: "Gold", memberId: "m1", totalCopay: 10, itemsCovered: 1, itemsNotCovered: 0, priorAuthRequired: [] },
         notes: null,
+        alternatives: [],
+        reasoning: null,
       };
       mockApi.post.mockResolvedValueOnce(receipt);
 
