@@ -67,6 +67,18 @@ export interface ReceiptDrugItem {
   requiresPriorAuth: boolean;
 }
 
+export interface ReceiptAlternative {
+  drugName: string;
+  copay: number | null;
+  coverageStatus: CoverageStatus;
+  reason: string;
+}
+
+export interface ReceiptReasoning {
+  clinicianSummary: string;
+  patientExplanation: string;
+}
+
 export interface PrescriptionReceipt {
   receiptId: string;
   prescriptionId: string;
@@ -93,13 +105,21 @@ export interface PrescriptionReceipt {
     itemsNotCovered: number;
     priorAuthRequired: string[];
   };
+  alternatives: ReceiptAlternative[];
+  reasoning: ReceiptReasoning | null;
   notes: string | null;
 }
 
 export interface PatientPack {
-  instructions: string;
-  warnings: string[];
-  medicationSchedule: string | null;
+  medicationName: string;
+  purpose: string;
+  howToTake: string;
+  whatToAvoid: string[];
+  sideEffects: string[];
+  whenToSeekHelp: string[];
+  storageInstructions: string;
+  dailySchedule: string | null;
+  language: string;
 }
 
 // ── Request / response types ──────────────────────────────
@@ -238,4 +258,15 @@ export async function listPrescriptionsByVisit(
   return await apiClient.get(
     `/visits/${visitId}/prescriptions`,
   ) as unknown as PrescriptionSummary[];
+}
+
+export async function downloadPrescriptionPdf(
+  prescriptionId: string,
+): Promise<Blob> {
+  const resp = await apiClient.post(
+    `/prescriptions/${prescriptionId}/pdf`,
+    {},
+    { responseType: "blob" },
+  );
+  return resp as unknown as Blob;
 }

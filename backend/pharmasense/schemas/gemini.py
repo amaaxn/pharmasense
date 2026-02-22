@@ -142,4 +142,8 @@ class PatientInstructionsOutput(BaseModel):
         description="Warning signs that require immediate medical attention",
     )
     storage_instructions: str = Field(default="")
+    daily_schedule: str | None = Field(
+        default=None,
+        description="When to take the medication during the day, e.g. 'Morning and evening with meals'",
+    )
     language: str = Field(default="en", description="ISO language code of the output")

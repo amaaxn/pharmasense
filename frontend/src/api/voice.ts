@@ -2,26 +2,26 @@ import apiClient from "./client";
 
 export interface VoiceGenerateRequest {
   prescriptionId: string;
-  language?: string;
+  text?: string;
+  language?: "en" | "es";
 }
 
-export interface VoicePack {
-  voiceId: string;
+export interface VoiceResponse {
   audioUrl: string;
-  language: string;
+  prescriptionId: string;
 }
 
 export async function generateVoicePack(
   payload: VoiceGenerateRequest,
-): Promise<VoicePack> {
-  return await apiClient.post(
+): Promise<VoiceResponse> {
+  return (await apiClient.post(
     "/voice/generate",
     payload,
-  ) as unknown as VoicePack;
+  )) as unknown as VoiceResponse;
 }
 
-export async function getVoicePack(voiceId: string): Promise<VoicePack> {
-  return await apiClient.get(
+export async function getVoicePack(voiceId: string): Promise<VoiceResponse> {
+  return (await apiClient.get(
     `/voice/${voiceId}`,
-  ) as unknown as VoicePack;
+  )) as unknown as VoiceResponse;
 }

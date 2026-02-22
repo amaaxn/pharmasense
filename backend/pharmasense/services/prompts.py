@@ -105,6 +105,7 @@ _PATIENT_INSTRUCTIONS_SCHEMA = """\
   "side_effects": ["Common side effects the patient should be aware of"],
   "when_to_seek_help": ["Warning signs that require immediate medical attention"],
   "storage_instructions": "How and where to store the medication",
+  "daily_schedule": "When to take the medication during the day, e.g. 'Morning and evening with meals' (or null if not applicable)",
   "language": "ISO language code"
 }"""
 
@@ -387,10 +388,11 @@ Patient safety profile:
 Generate comprehensive, patient-friendly medication instructions covering:
 1. **Purpose** — What this medication treats, in plain language a patient can understand.
 2. **How to take it** — Step-by-step instructions: when, how much, with or without food, etc.
-3. **What to avoid** — Foods, drinks, activities, supplements, or other drugs that interact.
-4. **Side effects** — Common side effects the patient should expect and monitor.
-5. **When to seek help** — Red-flag warning signs requiring immediate medical attention.
-6. **Storage** — How and where to store the medication properly.
+3. **Daily schedule** — A concise string describing when to take it during the day (e.g. "Morning and evening with meals"). Set to null if the frequency doesn't map to a clear daily pattern.
+4. **What to avoid** — Foods, drinks, activities, supplements, or other drugs that interact.
+5. **Side effects** — Common side effects the patient should expect and monitor.
+6. **When to seek help** — Red-flag warning signs requiring immediate medical attention.
+7. **Storage** — How and where to store the medication properly.
 
 ## CONSTRAINTS
 - Write in short, clear sentences. Avoid medical jargon where possible.

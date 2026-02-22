@@ -47,6 +47,18 @@ class ReceiptCoverageSummary(BaseModel):
     prior_auth_required: list[str]
 
 
+class ReceiptAlternative(BaseModel):
+    drug_name: str
+    copay: float | None = None
+    coverage_status: str = "UNKNOWN"
+    reason: str = ""
+
+
+class ReceiptReasoning(BaseModel):
+    clinician_summary: str = ""
+    patient_explanation: str = ""
+
+
 class PrescriptionReceipt(BaseModel):
     receipt_id: UUID
     prescription_id: UUID
@@ -61,6 +73,8 @@ class PrescriptionReceipt(BaseModel):
     drugs: list[ReceiptDrugItem]
     safety: ReceiptSafetySummary
     coverage: ReceiptCoverageSummary
+    alternatives: list[ReceiptAlternative] = []
+    reasoning: ReceiptReasoning | None = None
 
     notes: str | None = None
     signature_hash: str | None = None

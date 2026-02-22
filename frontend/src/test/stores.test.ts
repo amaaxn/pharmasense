@@ -457,9 +457,15 @@ describe("§5.4 prescriptionStore", () => {
   describe("generatePatientPack", () => {
     it("fetches and stores patient pack", async () => {
       const pack: PatientPack = {
-        instructions: "Take with food",
-        warnings: ["Avoid alcohol"],
-        medicationSchedule: "Morning and evening",
+        medicationName: "Lisinopril",
+        purpose: "Blood pressure control",
+        howToTake: "Take one tablet by mouth daily",
+        whatToAvoid: ["Alcohol", "Potassium supplements"],
+        sideEffects: ["Dizziness", "Dry cough"],
+        whenToSeekHelp: ["Swelling of face or throat"],
+        storageInstructions: "Store at room temperature",
+        dailySchedule: "Morning",
+        language: "en",
       };
       mockApi.post.mockResolvedValueOnce(pack);
 
