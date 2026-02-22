@@ -286,9 +286,9 @@ const en: Dictionary = {
 
   // Navigation
   navMain: "Main navigation",
-  navOverview: "Overview",
-  navFeatures: "Features",
-  navWorkflow: "Workflow",
+  navOverview: "At a Glance",
+  navFeatures: "Capabilities",
+  navWorkflow: "Process",
   navImpact: "Impact",
   navMyProfile: "My Profile",
   navMyPrescriptions: "My Prescriptions",
@@ -565,9 +565,9 @@ const es: Dictionary = {
 
   // Navegación
   navMain: "Navegación principal",
-  navOverview: "Resumen",
-  navFeatures: "Características",
-  navWorkflow: "Flujo de trabajo",
+  navOverview: "Vistazo",
+  navFeatures: "Capacidades",
+  navWorkflow: "Proceso",
   navImpact: "Impacto",
   navMyProfile: "Mi Perfil",
   navMyPrescriptions: "Mis Recetas",

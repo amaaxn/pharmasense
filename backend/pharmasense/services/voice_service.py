@@ -6,6 +6,7 @@ import logging
 import os
 from uuid import UUID
 
+from pharmasense.config import settings as app_settings
 from pharmasense.schemas.prescription_ops import AnalyticsEventType
 from pharmasense.schemas.voice import VoiceRequest, VoiceResponse
 from pharmasense.services.analytics_service import AnalyticsService
@@ -21,12 +22,16 @@ SILENT_MP3 = (
 
 class VoiceService:
     def __init__(self) -> None:
-        self._api_key = os.getenv("ELEVENLABS_API_KEY", "")
+        self._api_key = app_settings.elevenlabs_api_key or os.getenv("ELEVENLABS_API_KEY", "")
         self._voice_id = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
         self._fallback_url = os.getenv("DEMO_VOICE_FALLBACK_URL", "")
         self._storage = StorageService()
         self._analytics = AnalyticsService()
         self._last_successful_url: str | None = None
+
+    async def synthesize_speech(self, text: str, language: str = "en") -> bytes:
+        """Return raw audio bytes for the given text. No storage, no analytics."""
+        return await self._call_elevenlabs(text, language)
 
     async def generate_voice_pack(self, request: VoiceRequest) -> VoiceResponse:
         script = await self._build_voice_script(request)
@@ -139,12 +144,13 @@ class VoiceService:
         try:
             import httpx
 
-            async with httpx.AsyncClient() as client:
+            logger.info("Calling ElevenLabs TTS (voice=%s, text_len=%d)", self._voice_id, len(text))
+            async with httpx.AsyncClient(proxy=None) as client:
                 resp = await client.post(
                     f"https://api.elevenlabs.io/v1/text-to-speech/{self._voice_id}",
                     headers={
                         "xi-api-key": self._api_key,
-                        "Accept": "application/octet-stream",
+                        "Accept": "audio/mpeg",
                         "Content-Type": "application/json",
                     },
                     json={
@@ -158,6 +164,7 @@ class VoiceService:
                     timeout=30.0,
                 )
                 resp.raise_for_status()
+                logger.info("ElevenLabs returned %d bytes (status %d)", len(resp.content), resp.status_code)
                 return resp.content
         except Exception:
             logger.exception("ElevenLabs API call failed, returning silent audio")

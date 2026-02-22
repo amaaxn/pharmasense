@@ -293,12 +293,16 @@ export function AddVisitPage() {
   const handleApproveOption = useCallback(
     async (index: number, comment: string) => {
       const id = prescriptionStore.prescriptionId || "";
-      await prescriptionStore.approveOption(id, true, comment);
-      setOptionStates((prev) => {
-        const next = [...prev];
-        next[index] = "approved";
-        return next;
-      });
+      try {
+        await prescriptionStore.approveOption(id, true, comment);
+        setOptionStates((prev) => {
+          const next = [...prev];
+          next[index] = "approved";
+          return next;
+        });
+      } catch {
+        // approvalError is already set in the store
+      }
     },
     [prescriptionStore],
   );
@@ -306,12 +310,16 @@ export function AddVisitPage() {
   const handleRejectOption = useCallback(
     async (index: number, reason: string) => {
       const id = prescriptionStore.prescriptionId || "";
-      await prescriptionStore.rejectOption(id, reason);
-      setOptionStates((prev) => {
-        const next = [...prev];
-        next[index] = "rejected";
-        return next;
-      });
+      try {
+        await prescriptionStore.rejectOption(id, reason);
+        setOptionStates((prev) => {
+          const next = [...prev];
+          next[index] = "rejected";
+          return next;
+        });
+      } catch {
+        // error is already set in the store
+      }
     },
     [prescriptionStore],
   );
@@ -463,6 +471,7 @@ export function AddVisitPage() {
                 recommendations={prescriptionStore.options}
                 isLoading={prescriptionStore.isLoading}
                 error={prescriptionStore.error}
+                approvalError={prescriptionStore.approvalError}
                 onGenerate={handleGenerateRecommendations}
                 onRetry={handleGenerateRecommendations}
                 onApprove={handleApproveOption}

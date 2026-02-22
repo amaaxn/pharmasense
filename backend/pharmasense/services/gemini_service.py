@@ -56,7 +56,10 @@ class GeminiService:
         self._api_key = settings.gemini_api_key
         self._model = settings.gemini_model
         self._base_url = getattr(settings, "gemini_base_url", GEMINI_BASE_URL)
-        self._client = client or httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=10.0))
+        self._client = client or httpx.AsyncClient(
+            timeout=httpx.Timeout(60.0, connect=10.0),
+            proxy=None,
+        )
 
     async def close(self) -> None:
         await self._client.aclose()

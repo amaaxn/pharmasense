@@ -54,7 +54,7 @@ export function AdherenceRiskTable({ data }: AdherenceRiskTableProps) {
           </thead>
           <tbody className="divide-y divide-border-default">
             {data.map((item) => {
-              const risk = riskConfig[item.risk_level] || riskConfig.LOW_RISK;
+              const risk = (riskConfig[item.risk_level] ?? riskConfig.LOW_RISK)!;
               const covClass = coverageColors[item.coverage_status] || coverageColors.UNKNOWN;
               const tClass = item.tier ? tierColors[item.tier] || "" : "";
               return (

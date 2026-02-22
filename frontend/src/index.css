@@ -1,102 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
-   PharmaSense V2 — Design System Tokens (Spec §1)
-   
-   Tailwind CSS v4 @theme block: generates CSS custom properties
-   on :root AND utility classes (e.g. bg-bg-primary, text-h1).
-   Overrides in .high-contrast / .large-type / .dyslexia-font
-   swap the custom property values at runtime.
+   PharmaSense V2 — Premium Design System Tokens
+   Dark purple medical theme
    ============================================================ */
 
 @theme {
-  /* --- Fonts (§1.2) --- */
+  /* --- Fonts --- */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-dyslexia: "OpenDyslexic", sans-serif;
 
-  /* --- Colors: Backgrounds (§1.1) --- */
-  --color-bg-primary: #070609;
+  /* --- Core semantic colors (new design system) --- */
+  --color-background: #0a0811;
+  --color-foreground: #f3eef7;
+  --color-primary: #a855f7;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1c1726;
+  --color-secondary-foreground: #f3eef7;
+  --color-muted: #241e2e;
+  --color-muted-foreground: #9e8fb5;
+  --color-accent: #1c1726;
+  --color-accent-foreground: #f3eef7;
+  --color-card: #121018;
+  --color-card-foreground: #f3eef7;
+  --color-popover: #161222;
+  --color-popover-foreground: #f3eef7;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #33273f;
+  --color-input: #211b2b;
+  --color-ring: #a855f7;
+
+  /* --- Legacy aliases (preserve existing class usage) --- */
+  --color-bg-primary: #0a0811;
   --color-bg-card: #121018;
-  --color-bg-input: #18141F;
-  --color-bg-elevated: #1F1828;
+  --color-bg-input: #18141f;
+  --color-bg-elevated: #1f1828;
+  --color-border-default: #33273f;
+  --color-border-focus: #a855f7;
+  --color-text-primary: #f3eef7;
+  --color-text-secondary: #9e8fb5;
+  --color-text-heading: #ffffff;
 
-  /* --- Colors: Borders (§1.1) --- */
-  --color-border-default: #33273F;
-  --color-border-focus: #A855F7;
+  /* --- PharmaSense extended palette --- */
+  --color-ps-purple: #a855f7;
+  --color-ps-plum: #7c3aed;
+  --color-ps-burgundy: #7f1d3a;
+  --color-ps-wine: #6b1630;
+  --color-ps-crimson: #991b3a;
+  --color-ps-rose: #be425a;
+  --color-ps-maroon: #4a0d1f;
+  --color-ps-blue: #3b82f6;
+  --color-ps-green: #22c55e;
+  --color-ps-red: #dc2626;
+  --color-ps-amber: #f59e0b;
 
-  /* --- Colors: Text (§1.1) --- */
-  --color-text-primary: #F3EEF7;
-  --color-text-secondary: #B6A9C9;
-  --color-text-heading: #FFFFFF;
+  /* --- Legacy accent aliases --- */
+  --color-accent-purple: #a855f7;
+  --color-accent-plum: #7c3aed;
+  --color-accent-burgundy: #7f1d3a;
+  --color-accent-wine: #6b1630;
+  --color-accent-crimson: #991b3a;
+  --color-accent-rose: #be425a;
+  --color-accent-blue: #3b82f6;
+  --color-accent-green: #22c55e;
+  --color-accent-red: #dc2626;
+  --color-accent-amber: #f59e0b;
+  --color-accent-maroon: #4a0d1f;
 
-  /* --- Colors: Accents (§1.1) --- */
-  --color-accent-purple: #A855F7;
-  --color-accent-plum: #7C3AED;
-  --color-accent-burgundy: #7F1D3A;
-  --color-accent-blue: #3B82F6;
-  --color-accent-green: #22C55E;
-  --color-accent-red: #DC2626;
-  --color-accent-amber: #F59E0B;
-  --color-accent-maroon: #5B0F1F;
+  /* --- Safety status --- */
+  --color-safety-pass: #22c55e;
+  --color-safety-fail: #dc2626;
+  --color-safety-warn: #f59e0b;
 
-  /* --- Colors: Safety status (§1.1) --- */
-  --color-safety-pass: #22C55E;
-  --color-safety-fail: #DC2626;
-  --color-safety-warn: #F59E0B;
+  /* --- Coverage status --- */
+  --color-coverage-covered: #22c55e;
+  --color-coverage-not-covered: #b91c1c;
+  --color-coverage-prior-auth: #f59e0b;
+  --color-coverage-unknown: #9ca3af;
 
-  /* --- Colors: Coverage status (§1.1) --- */
-  --color-coverage-covered: #22C55E;
-  --color-coverage-not-covered: #B91C1C;
-  --color-coverage-prior-auth: #F59E0B;
-  --color-coverage-unknown: #9CA3AF;
+  /* --- Tier --- */
+  --color-tier-1: #22c55e;
+  --color-tier-2: #a855f7;
+  --color-tier-3: #f59e0b;
+  --color-tier-4: #dc2626;
 
-  /* --- Colors: Tier (§1.1) --- */
-  --color-tier-1: #22C55E;
-  --color-tier-2: #A855F7;
-  --color-tier-3: #F59E0B;
-  --color-tier-4: #DC2626;
+  /* --- Sidebar --- */
+  --color-sidebar: #0d0a14;
+  --color-sidebar-foreground: #9e8fb5;
+  --color-sidebar-accent: #1f1828;
+  --color-sidebar-accent-foreground: #f3eef7;
+  --color-sidebar-border: #291f36;
+  --color-sidebar-ring: #a855f7;
 
-  /* --- Typography scale (§1.2) --- */
+  /* --- Typography scale --- */
   --text-display: 3rem;
   --text-display--line-height: 1.1;
   --text-display--font-weight: 700;
-
   --text-h1: 2rem;
   --text-h1--line-height: 1.2;
   --text-h1--font-weight: 700;
-
   --text-h2: 1.5rem;
   --text-h2--line-height: 1.3;
   --text-h2--font-weight: 600;
-
   --text-h3: 1.25rem;
   --text-h3--line-height: 1.4;
   --text-h3--font-weight: 600;
-
   --text-body: 1rem;
   --text-body--line-height: 1.5;
-
   --text-body-lg: 1.125rem;
   --text-body-lg--line-height: 1.5;
-
   --text-sm: 0.875rem;
   --text-sm--line-height: 1.43;
-
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.33;
   --text-xs--font-weight: 500;
-
   --text-mono: 0.875rem;
   --text-mono--line-height: 1.43;
 
-  /* --- Shadows (§1.5) --- */
+  /* --- Shadows --- */
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-glow-purple: 0 0 16px rgba(168, 85, 247, 0.35);
-  --shadow-glow-green: 0 0 16px rgba(34, 197, 94, 0.35);
-  --shadow-glow-red: 0 0 16px rgba(220, 38, 38, 0.35);
+  --shadow-glow-purple: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1);
+  --shadow-glow-brand: 0 0 20px rgba(127, 29, 58, 0.35), 0 0 60px rgba(168, 85, 247, 0.12);
+  --shadow-glow-burgundy: 0 0 16px rgba(127, 29, 58, 0.4);
+  --shadow-glow-green: 0 0 16px rgba(34, 197, 94, 0.3);
+  --shadow-glow-red: 0 0 16px rgba(220, 38, 38, 0.3);
+  --shadow-glow-blue: 0 0 16px rgba(59, 130, 246, 0.3);
+
+  /* --- Radius --- */
+  --radius-lg: 0.75rem;
+  --radius-md: 0.625rem;
+  --radius-sm: 0.5rem;
 }
 
 /* ============================================================
@@ -107,27 +146,152 @@
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-primary);
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    overflow-x: hidden;
+  }
 }
 
 /* ============================================================
-   High-contrast mode overrides (§1.1)
-   Activated by adding class="high-contrast" on <html>
+   Glassmorphism
+   ============================================================ */
+
+.glass {
+  background: rgba(14, 11, 20, 0.6);
+  border: 1px solid rgba(51, 39, 63, 0.5);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+.glass-card {
+  background: rgba(18, 16, 24, 0.5);
+  border: 1px solid rgba(51, 39, 63, 0.4);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+}
+
+/* ============================================================
+   Gradient borders
+   ============================================================ */
+
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(127,29,58,0.5), rgba(168,85,247,0.3), rgba(127,29,58,0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Premium card hover
+   ============================================================ */
+
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(127, 29, 58, 0.15), 0 4px 16px rgba(168, 85, 247, 0.1), 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: rgba(127, 29, 58, 0.35);
+}
+
+/* ============================================================
+   Typography utilities
+   ============================================================ */
+
+.text-gradient {
+  background: linear-gradient(135deg, #a855f7, #8b5cf6, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-hero {
+  background: linear-gradient(135deg, #ffffff, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #7f1d3a, #991b3a, #be425a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-brand-accent {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.font-display {
+  font-family: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ============================================================
+   Scrollbar styling
+   ============================================================ */
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-background); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-ps-burgundy); }
+
+/* ============================================================
+   Stepper connector line
+   ============================================================ */
+
+.stepper-line {
+  position: absolute;
+  top: 20px;
+  left: calc(50% + 24px);
+  width: calc(100% - 48px);
+  height: 2px;
+  background: linear-gradient(90deg, rgba(127,29,58,0.6), rgba(168,85,247,0.3), rgba(127,29,58,0.1));
+}
+
+/* ============================================================
+   Focus ring
+   ============================================================ */
+
+*:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Accessibility modes
    ============================================================ */
 
 .high-contrast {
+  --color-background: #000000;
   --color-bg-primary: #000000;
-  --color-text-primary: #FFFFFF;
-  --color-border-default: #FFFFFF;
-  --color-accent-purple: #C084FC;
+  --color-foreground: #ffffff;
+  --color-text-primary: #ffffff;
+  --color-border: #ffffff;
+  --color-border-default: #ffffff;
+  --color-primary: #c084fc;
+  --color-accent-purple: #c084fc;
 }
-
-/* ============================================================
-   Large type mode (§1.2)
-   Activated by adding class="large-type" on <html>
-   Multiplies all font sizes by 1.25x.
-   ============================================================ */
 
 .large-type {
   --text-display: 3.75rem;
@@ -141,27 +305,12 @@
   --text-mono: 1.09375rem;
 }
 
-/* ============================================================
-   Dyslexia font mode (§1.2)
-   Activated by adding class="dyslexia-font" on <html>
-   Swaps the primary sans-serif font to OpenDyslexic.
-   ============================================================ */
-
 .dyslexia-font {
   --font-sans: "OpenDyslexic", sans-serif;
 }
 
 /* ============================================================
-   Focus-visible ring (uses border-focus token)
-   ============================================================ */
-
-*:focus-visible {
-  outline: 2px solid var(--color-border-focus);
-  outline-offset: 2px;
-}
-
-/* ============================================================
-   Skip link (accessibility — §3.2)
+   Skip link
    ============================================================ */
 
 .skip-link {
@@ -169,37 +318,29 @@
   left: -9999px;
   z-index: 999;
   padding: 0.5rem 1rem;
-  background: var(--color-accent-purple);
+  background: var(--color-primary);
   color: white;
   text-decoration: none;
   border-radius: 0 0 8px 0;
   font-weight: 600;
 }
-
-.skip-link:focus {
-  left: 0;
-  top: 0;
-}
+.skip-link:focus { left: 0; top: 0; }
 
 /* ============================================================
-   Reduced motion (§3.4)
-   Respect OS-level preference + manual toggle
+   Reduced motion
    ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
     transition-duration: 0s !important;
     transition-delay: 0s !important;
   }
+  .card-hover:hover { transform: none; }
 }
 
-.reduce-motion *,
-.reduce-motion *::before,
-.reduce-motion *::after {
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
   animation-duration: 0s !important;
   animation-delay: 0s !important;
   transition-duration: 0s !important;
@@ -207,7 +348,7 @@
 }
 
 /* ============================================================
-   Visually hidden utility (for screen-reader-only content)
+   Screen-reader only
    ============================================================ */
 
 .sr-only {

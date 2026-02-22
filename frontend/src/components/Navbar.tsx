@@ -2,8 +2,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useUiStore } from "../stores/uiStore";
 import { useTranslation } from "../i18n";
-import { Button } from "../shared/Button";
-import { Avatar } from "../shared/Avatar";
+import { Menu, X, LogOut } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function Navbar() {
   const { t } = useTranslation();
@@ -14,12 +14,8 @@ export function Navbar() {
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
 
-  const isActive = (path: string) =>
-    location.pathname === path || location.pathname.startsWith(`${path}/`);
-
   const isLanding = location.pathname === "/";
 
-  // Logged out: Overview, Features, Workflow, Impact (anchor links on landing)
   const publicNav = [
     { label: t.navOverview, href: isLanding ? "#overview" : "/#overview" },
     { label: t.navFeatures, href: isLanding ? "#features" : "/#features" },
@@ -27,121 +23,88 @@ export function Navbar() {
     { label: t.navImpact, href: isLanding ? "#impact" : "/#impact" },
   ];
 
-  // Patient: My Profile, My Prescriptions, My Visits
-  const patientNav = [
-    { label: t.navMyProfile, path: "/patient/profile" },
-    { label: t.navMyPrescriptions, path: "/patient/prescriptions" },
-    { label: t.navMyVisits, path: "/patient/visits" },
-  ];
-
-  // Clinician: Dashboard, New Visit, Analytics
-  const clinicianNav = [
-    { label: t.navDashboard, path: "/clinician" },
-    { label: t.navNewVisit, path: "/clinician/visit/new" },
-    { label: t.navAnalytics, path: "/analytics" },
-  ];
-
-  const centerLinks = !user
-    ? publicNav
-    : user.role === "patient"
-      ? patientNav
-      : clinicianNav;
-
-  const profilePath = user?.role === "patient" ? "/patient/profile" : "/clinician";
+  const displayName = user?.email?.split("@")[0] ?? "";
 
   return (
-    <nav
-      className="fixed left-0 right-0 top-0 z-40 w-full border-b border-border-default/50 bg-bg-primary/80 backdrop-blur-md"
+    <motion.nav
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="fixed left-0 right-0 top-0 z-40 glass"
+      style={{ height: "3.75rem" }}
       aria-label={t.navMain}
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-        {/* Logo */}
-        <Link
-          to="/"
-          className="text-h3 font-bold text-text-heading hover:text-accent-purple focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary rounded"
-        >
-          PharmaSense
-        </Link>
+      <div className="flex h-full items-center justify-between px-4 md:px-6">
+        {/* Left: hamburger + logo */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleSidebar}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden"
+            aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+          >
+            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
 
-        {/* Center nav — visible on md+ */}
-        <div className="hidden md:flex md:items-center md:gap-6">
-          {centerLinks.map((item) =>
-            "path" in item ? (
-              <Link
-                key={item.path}
-                to={item.path}
-                aria-current={isActive(item.path) ? "page" : undefined}
-                className="text-text-secondary hover:text-text-primary aria-[current=page]:text-accent-purple aria-[current=page]:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus rounded px-1"
-              >
-                {item.label}
-              </Link>
-            ) : (
+          <Link to="/" className="group flex items-center gap-2 text-foreground">
+            <img
+              src="/logo.png"
+              alt="PharmaSense logo"
+              className="h-9 w-auto object-contain drop-shadow-[0_0_8px_rgba(127,29,58,0.4)] transition-transform group-hover:scale-105"
+            />
+            <span className="font-display text-lg font-bold tracking-tight">
+              <span className="text-gradient-brand">Pharma</span><span className="text-gradient-brand-accent">Sense</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Center: desktop nav pill — only shown when logged out (dashboards have their own tab nav) */}
+        {!user && (
+          <div className="hidden items-center gap-0.5 rounded-xl bg-secondary/40 p-1 md:flex">
+            {publicNav.map((item) => (
               <a
-                key={item.href}
+                key={item.label}
                 href={item.href}
-                className="text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus rounded px-1"
+                className="rounded-lg px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
               >
                 {item.label}
               </a>
-            ),
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {/* Right: Auth area */}
-        <div className="flex items-center gap-3">
+        {/* Right: auth */}
+        <div className="flex items-center gap-2.5">
           {user ? (
             <>
-              <Link
-                to={profilePath}
-                className="flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
-                aria-label={t.pageProfile}
-              >
-                <Avatar fallback={user.email} size="sm" />
-              </Link>
-              <Button
-                variant="ghost"
-                size="sm"
+              <div className="hidden items-center gap-2.5 sm:flex">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-ps-burgundy/40 to-primary/30 text-sm font-semibold text-foreground ring-1 ring-ps-burgundy/30">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium leading-tight text-foreground">{displayName}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{user.role}</span>
+                </div>
+              </div>
+              <button
                 onClick={async () => {
                   await signOut();
                   navigate("/");
                 }}
+                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive"
+                aria-label={t.signOut}
               >
-                {t.signOut}
-              </Button>
+                <LogOut className="h-4 w-4" />
+              </button>
             </>
           ) : (
             <Link to="/login">
-              <Button variant="primary" size="sm">
+              <button className="rounded-lg bg-gradient-to-r from-ps-burgundy to-primary px-4 py-1.5 text-sm font-medium text-white shadow-glow-brand transition hover:opacity-90">
                 {t.signIn}
-              </Button>
+              </button>
             </Link>
           )}
-
-          {/* Hamburger — mobile */}
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            className="ml-2 flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-elevated hover:text-text-primary md:hidden"
-            aria-label={t.navMain}
-            aria-expanded={sidebarOpen}
-          >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
         </div>
       </div>
-    </nav>
+    </motion.nav>
   );
 }

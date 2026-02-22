@@ -65,6 +65,7 @@ interface PrescriptionState {
   patientPack: PatientPack | null;
   isLoading: boolean;
   error: string | null;
+  approvalError: string | null;
   isDemoMode: boolean;
 
   fetchRecommendations: (req: RecommendationRequest) => Promise<void>;
@@ -90,6 +91,7 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   patientPack: null,
   isLoading: false,
   error: null,
+  approvalError: null,
   isDemoMode: false,
 
   fetchRecommendations: async (req) => {
@@ -116,11 +118,13 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
         isDemoMode: false,
       });
     } catch {
+      const demoPrescriptionId = `demo-${crypto.randomUUID()}`;
       const cached = getCachedRecommendations();
       if (cached) {
         set({
           options: cached.options,
           reasoningSummary: cached.reasoningSummary,
+          prescriptionId: demoPrescriptionId,
           status: "recommended",
           isLoading: false,
           isDemoMode: true,
@@ -129,6 +133,7 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
         set({
           options: DEMO_RECOMMENDATIONS,
           reasoningSummary: DEMO_REASONING_SUMMARY,
+          prescriptionId: demoPrescriptionId,
           status: "recommended",
           isLoading: false,
           isDemoMode: true,
@@ -142,7 +147,12 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   },
 
   approveOption: async (prescriptionId, confirmedSafetyReview, comment) => {
-    set({ isLoading: true, error: null });
+    const state = usePrescriptionStore.getState();
+    if (state.isDemoMode) {
+      set({ prescriptionId, status: "approved", isLoading: false, approvalError: null });
+      return;
+    }
+    set({ isLoading: true, approvalError: null });
     try {
       const receipt = await apiApprove({
         prescription_id: prescriptionId,
@@ -158,15 +168,20 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
     } catch (err: unknown) {
       const axiosErr = err as { response?: { status?: number } };
       if (axiosErr.response?.status === 422) {
-        set({ status: "blocked", error: "Prescription blocked", isLoading: false });
+        set({ status: "blocked", approvalError: "Prescription blocked by safety check", isLoading: false });
       } else {
-        set({ error: (err as Error).message, isLoading: false });
+        set({ approvalError: (err as Error).message, isLoading: false });
       }
       throw err;
     }
   },
 
   rejectOption: async (prescriptionId, reason) => {
+    const state = usePrescriptionStore.getState();
+    if (state.isDemoMode) {
+      set({ prescriptionId, status: "rejected", isLoading: false });
+      return;
+    }
     set({ isLoading: true, error: null });
     try {
       await apiReject({
@@ -215,6 +230,7 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
       patientPack: null,
       isLoading: false,
       error: null,
+      approvalError: null,
       isDemoMode: false,
     });
   },

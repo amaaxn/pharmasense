@@ -1,0 +1,46 @@
+# Version control
+.git
+.gitignore
+
+# Environment / secrets
+.env
+.env.*
+!.env.template
+
+# Python artifacts
+__pycache__
+*.py[cod]
+*.egg-info
+.venv
+venv
+.mypy_cache
+.pytest_cache
+
+# Node artifacts
+node_modules
+frontend/.vite
+
+# IDE
+.vscode
+.idea
+.cursor
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs (rebuilt in Docker)
+frontend/dist
+backend/static
+
+# Docs and specs
+specs
+*.md
+LICENSE
+
+# Docker / deploy meta (not needed inside the image)
+docker-compose*.yml
+Caddyfile
+.do
+deploy

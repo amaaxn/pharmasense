@@ -14,19 +14,19 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-accent-purple text-white border-0 hover:bg-accent-purple/90 hover:shadow-glow-purple",
+    "bg-gradient-to-r from-ps-burgundy to-primary text-white border-0 hover:opacity-90 shadow-glow-brand",
   secondary:
-    "bg-transparent text-accent-purple border border-accent-purple hover:bg-accent-purple/10",
+    "glass text-foreground border border-border/50 hover:bg-secondary/60",
   ghost:
-    "bg-transparent text-text-secondary border-0 hover:bg-bg-elevated",
+    "bg-transparent text-muted-foreground border-0 hover:bg-secondary hover:text-foreground",
   danger:
-    "bg-transparent text-accent-red border border-accent-red hover:bg-accent-red/10",
+    "bg-transparent text-destructive border border-destructive/40 hover:bg-destructive/10",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "py-1.5 px-3 text-sm",
-  md: "py-2.5 px-5 text-body",
-  lg: "py-3 px-6 text-body-lg",
+  sm: "py-1.5 px-3 text-sm rounded-lg",
+  md: "py-2.5 px-5 text-sm rounded-xl",
+  lg: "py-3 px-6 text-base rounded-xl",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -54,8 +54,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       aria-disabled={isDisabled}
       aria-label={!hasVisibleText ? ariaLabel : undefined}
       className={[
-        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary",
+        "inline-flex items-center justify-center gap-2 font-medium transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         variantClasses[variant],
         sizeClasses[size],
         isDisabled && "opacity-50 cursor-not-allowed",

@@ -156,6 +156,7 @@ class PrescriptionService:
 
         # Step 2–5: For each Gemini option, run rules engine + coverage
         annotated: list[RecommendationItem] = []
+        blocking_flags: list[bool] = []
         blocked_count = 0
         warning_count = 0
 
@@ -234,11 +235,14 @@ class PrescriptionService:
                 for a in alts
             ]
 
+            is_blocked = rules_out.has_blocking_failure
+
             annotated.append(RecommendationItem(
                 primary=primary,
                 alternatives=alt_drugs,
                 warnings=warnings,
             ))
+            blocking_flags.append(is_blocked)
 
         # Step 6: Persist prescription in the store
         rx_id = self._store.save_prescription({
@@ -247,8 +251,8 @@ class PrescriptionService:
             "status": "recommended",
             "items": [item.model_dump() for item in annotated],
             "rules_results": [
-                {"medication": item.primary.drug_name, "blocked": bool(item.warnings)}
-                for item in annotated
+                {"medication": item.primary.drug_name, "blocked": bf}
+                for item, bf in zip(annotated, blocking_flags)
             ],
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
@@ -268,7 +272,7 @@ class PrescriptionService:
             visit_id=request.visit_id,
             prescription_id=rx_id,
             recommendations=annotated,
-            gemini_model="gemini-flash-lite-latest",
+            gemini_model=self._gemini._model,
             reasoning_summary=gemini_out.clinical_reasoning,
         )
 

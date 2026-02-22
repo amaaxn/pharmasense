@@ -1,161 +1,123 @@
-import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../stores/authStore";
 import { useUiStore } from "../stores/uiStore";
 import { useTranslation } from "../i18n";
-import { useReducedMotion } from "../utils/useReducedMotion";
-import { slideInLeft, ANIMATION_DURATION } from "../utils/animations";
-
-const FOCUSABLE =
-  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+import {
+  User,
+  Pill,
+  Calendar,
+  LayoutDashboard,
+  PlusCircle,
+  BarChart3,
+  Eye,
+  Zap,
+  Workflow,
+  TrendingUp,
+} from "lucide-react";
 
 export function Sidebar() {
   const { t } = useTranslation();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
-  const toggleSidebar = useUiStore((s) => s.toggleSidebar);
-  const reducedMotion = useReducedMotion();
-  const panelRef = useRef<HTMLDivElement>(null);
+  const setSidebarOpen = useUiStore((s) => s.setSidebarOpen);
 
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
 
-  const isLanding = location.pathname === "/";
-
   const publicNav = [
-    { label: t.navOverview, href: isLanding ? "#overview" : "/#overview" },
-    { label: t.navFeatures, href: isLanding ? "#features" : "/#features" },
-    { label: t.navWorkflow, href: isLanding ? "#workflow" : "/#workflow" },
-    { label: t.navImpact, href: isLanding ? "#impact" : "/#impact" },
+    { label: t.navOverview, href: "#overview", icon: Eye },
+    { label: t.navFeatures, href: "#features", icon: Zap },
+    { label: t.navWorkflow, href: "#workflow", icon: Workflow },
+    { label: t.navImpact, href: "#impact", icon: TrendingUp },
   ];
 
   const patientNav = [
-    { label: t.navMyProfile, path: "/patient/profile" },
-    { label: t.navMyPrescriptions, path: "/patient/prescriptions" },
-    { label: t.navMyVisits, path: "/patient/visits" },
+    { label: t.navMyProfile, path: "/patient/profile", icon: User },
+    { label: t.navMyPrescriptions, path: "/patient/prescriptions", icon: Pill },
+    { label: t.navMyVisits, path: "/patient/visits", icon: Calendar },
   ];
 
   const clinicianNav = [
-    { label: t.navDashboard, path: "/clinician" },
-    { label: t.navNewVisit, path: "/clinician/visit/new" },
-    { label: t.navAnalytics, path: "/analytics" },
+    { label: t.navDashboard, path: "/clinician", icon: LayoutDashboard },
+    { label: t.navNewVisit, path: "/clinician/add-visit", icon: PlusCircle },
+    { label: t.navAnalytics, path: "/analytics", icon: BarChart3 },
   ];
 
-  const centerLinks = !user
+  const navItems = !user
     ? publicNav
-    : user.role === "patient"
-      ? patientNav
-      : clinicianNav;
-
-  useEffect(() => {
-    if (!sidebarOpen || !panelRef.current) return;
-
-    const panel = panelRef.current;
-    const focusables = panel.querySelectorAll<HTMLElement>(FOCUSABLE);
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-
-    first?.focus();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
-
-      const active = document.activeElement as HTMLElement | null;
-      if (!panel.contains(active)) return;
-
-      if (e.shiftKey) {
-        if (active === first) {
-          e.preventDefault();
-          last?.focus();
-        }
-      } else {
-        if (active === last) {
-          e.preventDefault();
-          first?.focus();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [sidebarOpen]);
-
-  if (!sidebarOpen) return null;
+    : user.role === "clinician"
+      ? clinicianNav
+      : patientNav;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40 bg-black/60 md:hidden"
-        onClick={toggleSidebar}
-        aria-hidden
-      />
+    <AnimatePresence>
+      {sidebarOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
 
-      {/* Drawer */}
-      <motion.div
-        ref={panelRef}
-        initial="hidden"
-        animate="visible"
-        variants={reducedMotion ? undefined : slideInLeft}
-        transition={
-          reducedMotion ? { duration: 0 } : { duration: ANIMATION_DURATION.sidebarSlide }
-        }
-        className="fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-border-default bg-bg-card shadow-modal md:hidden"
-        role="dialog"
-        aria-label={t.navCloseNavigation}
-      >
-        <div className="flex h-14 items-center justify-between border-b border-border-default px-4">
-          <span className="text-h3 font-bold text-text-heading">PharmaSense</span>
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            aria-label={t.navCloseNavigation}
-            className="rounded-lg p-2 text-text-secondary hover:bg-bg-elevated hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+          <motion.aside
+            initial={{ x: "-100%", opacity: 0.8 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "-100%", opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed bottom-0 left-0 top-[3.75rem] z-50 w-72 glass p-5 md:hidden"
+            role="navigation"
+            aria-label={t.navMain}
           >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <nav className="flex flex-1 flex-col gap-1 p-4" aria-label={t.navMain}>
-          {centerLinks.map((item) =>
-            "path" in item ? (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={toggleSidebar}
-                aria-current={isActive(item.path) ? "page" : undefined}
-                className="rounded-lg px-4 py-3 text-text-secondary hover:bg-bg-elevated hover:text-text-primary aria-[current=page]:bg-bg-elevated aria-[current=page]:text-accent-purple aria-[current=page]:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={toggleSidebar}
-                className="rounded-lg px-4 py-3 text-text-secondary hover:bg-bg-elevated hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
-              >
-                {item.label}
-              </a>
-            ),
-          )}
-        </nav>
-      </motion.div>
-    </>
+            <div className="flex flex-col gap-1">
+              {navItems.map((item, i) => {
+                const Icon = item.icon;
+                if ("href" in item) {
+                  return (
+                    <motion.a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </motion.a>
+                  );
+                }
+                return (
+                  <motion.div
+                    key={item.label}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Link
+                      to={item.path}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                        isActive(item.path)
+                          ? "bg-primary/12 text-primary"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

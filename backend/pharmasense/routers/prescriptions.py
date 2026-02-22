@@ -142,6 +142,12 @@ async def recommend(
         return ApiResponse(success=True, data=result)
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        logger.error("Gemini service error during recommendation: %s", exc)
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI service temporarily unavailable: {exc}",
+        ) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -186,11 +192,23 @@ async def approve(
         # Persist to Supabase so prescription counts + details survive server restarts
         try:
             logger.info("Persisting prescription %s to Supabase", receipt.prescription_id)
+
+            # Look up the real clinician_id from the visit record
+            clinician_id = str(receipt.clinician_id)
+            visit_rows = await supa.select(
+                "visits",
+                filters={"id": f"eq.{receipt.visit_id}"},
+                columns="clinician_id",
+                limit=1,
+            )
+            if visit_rows:
+                clinician_id = str(visit_rows[0].get("clinician_id", clinician_id))
+
             await supa.upsert("prescriptions", {
                 "id": str(receipt.prescription_id),
                 "visit_id": str(receipt.visit_id),
                 "patient_id": str(receipt.patient_id),
-                "clinician_id": str(receipt.clinician_id),
+                "clinician_id": clinician_id,
                 "status": "approved",
                 "approved_at": receipt.issued_at.isoformat(),
             }, on_conflict="id")
@@ -214,6 +232,7 @@ async def approve(
                         "copay": primary.get("estimated_copay"),
                         "is_covered": bool(primary.get("is_covered", True)),
                     })
+            logger.info("Successfully persisted prescription %s to Supabase", receipt.prescription_id)
         except Exception as exc:
             logger.warning("Failed to persist prescription to Supabase: %s", exc)
         return ApiResponse(success=True, data=receipt)

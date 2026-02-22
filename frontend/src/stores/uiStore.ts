@@ -18,6 +18,7 @@ interface UiState {
   toggleLanguage: () => void;
   setLanguage: (lang: Language) => void;
   toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
 }
 
 export const useUiStore = create<UiState>()(
@@ -41,6 +42,7 @@ export const useUiStore = create<UiState>()(
         set((s) => ({ language: s.language === "en" ? "es" : "en" })),
       setLanguage: (language) => set({ language }),
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
     }),
     {
       name: "pharmasense-ui",

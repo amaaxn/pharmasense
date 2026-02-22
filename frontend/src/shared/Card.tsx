@@ -23,12 +23,11 @@ export function Card({
     <div
       data-testid="card"
       className={[
-        "rounded-xl border border-border-default bg-bg-card p-6 shadow-card",
-        hoverable &&
-          "cursor-pointer transition-all hover:border-accent-purple/30 hover:shadow-card-hover",
-        selected && "border-accent-purple shadow-glow-purple",
+        "glass-card rounded-2xl p-6",
+        hoverable && "card-hover cursor-pointer",
+        selected && "border-primary/40 shadow-glow-purple",
         blocked &&
-          "relative border-accent-red/50 opacity-75 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:rounded-l-xl before:bg-accent-red",
+          "relative border-destructive/50 opacity-75 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:rounded-l-2xl before:bg-destructive",
         className,
       ]
         .filter(Boolean)
@@ -36,13 +35,13 @@ export function Card({
       {...rest}
     >
       {header && (
-        <div className="mb-4 border-b border-border-default pb-4">
+        <div className="mb-4 border-b border-border/30 pb-4">
           {header}
         </div>
       )}
       <div>{children}</div>
       {footer && (
-        <div className="mt-4 border-t border-border-default pt-4">{footer}</div>
+        <div className="mt-4 border-t border-border/30 pt-4">{footer}</div>
       )}
     </div>
   );

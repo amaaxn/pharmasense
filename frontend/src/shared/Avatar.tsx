@@ -3,15 +3,14 @@ import type { HTMLAttributes } from "react";
 export interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
   src?: string | null;
   alt?: string;
-  /** Fallback initial when no image (e.g. first letter of name) */
   fallback: string;
   size?: "sm" | "md" | "lg";
 }
 
 const sizeClasses = {
   sm: "h-8 w-8 text-sm",
-  md: "h-10 w-10 text-body",
-  lg: "h-12 w-12 text-body-lg",
+  md: "h-10 w-10 text-sm",
+  lg: "h-12 w-12 text-base",
 };
 
 export function Avatar({
@@ -27,7 +26,7 @@ export function Avatar({
   return (
     <div
       className={[
-        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-bg-elevated font-semibold text-text-primary",
+        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary/25 to-ps-plum/25 font-semibold text-primary ring-1 ring-primary/20",
         sizeClasses[size],
         className,
       ]

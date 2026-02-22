@@ -204,9 +204,9 @@ describe("§4.2 Dictionary content — selected values", () => {
   });
 
   it("EN navbar labels match spec §7.3", () => {
-    expect(dictionaries.en.navOverview).toBe("Overview");
-    expect(dictionaries.en.navFeatures).toBe("Features");
-    expect(dictionaries.en.navWorkflow).toBe("Workflow");
+    expect(dictionaries.en.navOverview).toBe("At a Glance");
+    expect(dictionaries.en.navFeatures).toBe("Capabilities");
+    expect(dictionaries.en.navWorkflow).toBe("Process");
     expect(dictionaries.en.navImpact).toBe("Impact");
     expect(dictionaries.en.navMyProfile).toBe("My Profile");
     expect(dictionaries.en.navMyPrescriptions).toBe("My Prescriptions");
@@ -217,7 +217,7 @@ describe("§4.2 Dictionary content — selected values", () => {
   });
 
   it("ES navbar labels are fully translated", () => {
-    expect(dictionaries.es.navOverview).toBe("Resumen");
+    expect(dictionaries.es.navOverview).toBe("Vistazo");
     expect(dictionaries.es.navDashboard).toBe("Panel");
     expect(dictionaries.es.navNewVisit).toBe("Nueva Visita");
     expect(dictionaries.es.navAnalytics).toBe("Analítica");

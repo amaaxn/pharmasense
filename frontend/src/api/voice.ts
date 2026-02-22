@@ -25,3 +25,26 @@ export async function getVoicePack(voiceId: string): Promise<VoiceResponse> {
     `/voice/${voiceId}`,
   )) as unknown as VoiceResponse;
 }
+
+export async function textToSpeech(
+  text: string,
+  language: string = "en",
+): Promise<Blob> {
+  const { useAuthStore } = await import("../stores/authStore");
+  const token = useAuthStore.getState().accessToken;
+
+  const resp = await fetch("/api/voice/tts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ text, language }),
+  });
+
+  if (!resp.ok) {
+    throw new Error(`TTS failed: ${resp.status}`);
+  }
+
+  return resp.blob();
+}
