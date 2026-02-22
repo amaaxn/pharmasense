@@ -1,6 +1,10 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
 [project]
 name = "pharmasense"
-version = "1.0.0"
+version = "2.0.0"
 description = "Coverage-aware prescription decision engine"
 requires-python = ">=3.11"
 dependencies = [
@@ -19,12 +23,8 @@ dependencies = [
     "reportlab>=4.0",
     "boto3>=1.35.0",
     "snowflake-connector-python>=3.12.0",
+    "tenacity>=9.0.0",
 ]
 
-[build-system]
-requires = ["setuptools>=75.0"]
-build-backend = "setuptools.build_meta"
-
 [tool.setuptools.packages.find]
-where = ["."]
 include = ["pharmasense*"]

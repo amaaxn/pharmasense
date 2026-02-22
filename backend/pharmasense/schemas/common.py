@@ -1,25 +1,20 @@
+"""Standard API response envelope and shared DTOs.
+
+Every API response uses ``ApiResponse`` as the outer wrapper (Part 1 §6.1).
+"""
+
+from __future__ import annotations
+
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
 
-class ErrorDetail(BaseModel):
-    code: str
-    message: str
-    details: dict[str, Any] | None = None
-
-
 class ApiResponse(BaseModel, Generic[T]):
-    success: bool
+    success: bool = True
     data: T | None = None
-    error: ErrorDetail | None = None
-
-    @classmethod
-    def ok(cls, data: T) -> "ApiResponse[T]":
-        return cls(success=True, data=data)
-
-    @classmethod
-    def fail(cls, code: str, message: str, details: dict[str, Any] | None = None) -> "ApiResponse[None]":
-        return cls(success=False, error=ErrorDetail(code=code, message=message, details=details))
+    error: str | None = None
+    error_code: str | None = None
+    meta: dict[str, Any] | None = None
