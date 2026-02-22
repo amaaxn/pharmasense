@@ -12,6 +12,12 @@ from pydantic import BaseModel, Field
 T = TypeVar("T")
 
 
+class ErrorDetail(BaseModel):
+    error: str
+    error_code: str
+    details: dict[str, Any] | None = None
+
+
 class ApiResponse(BaseModel, Generic[T]):
     success: bool = True
     data: T | None = None

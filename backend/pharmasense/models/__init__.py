@@ -6,6 +6,8 @@ from .prescription import Prescription
 from .prescription_item import PrescriptionItem
 from .formulary import FormularyEntry
 from .drug_interaction import DrugInteraction
+from .dose_range import DoseRange
+from .safety_check import SafetyCheck
 from .analytics_event import AnalyticsEvent
 
 __all__ = [
@@ -19,5 +21,7 @@ __all__ = [
     "PrescriptionItem",
     "FormularyEntry",
     "DrugInteraction",
+    "DoseRange",
+    "SafetyCheck",
     "AnalyticsEvent",
 ]

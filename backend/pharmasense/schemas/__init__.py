@@ -1,4 +1,15 @@
 from .common import ApiResponse, ErrorDetail
+from .formulary_service import (
+    AlternativeSuggestion,
+    CoverageResult,
+    CoverageStatus,
+    FormularyEntryData,
+)
+from .prescription_ops import (
+    AnalyticsEventType,
+    PrescriptionApprovalRequest,
+    PrescriptionRejectionRequest,
+)
 from .receipt import (
     PrescriptionReceipt,
     ReceiptCoverageSummary,
@@ -24,6 +35,13 @@ from .validation import (
 __all__ = [
     "ApiResponse",
     "ErrorDetail",
+    "AlternativeSuggestion",
+    "CoverageResult",
+    "CoverageStatus",
+    "FormularyEntryData",
+    "AnalyticsEventType",
+    "PrescriptionApprovalRequest",
+    "PrescriptionRejectionRequest",
     "PrescriptionReceipt",
     "ReceiptCoverageSummary",
     "ReceiptDrugItem",
