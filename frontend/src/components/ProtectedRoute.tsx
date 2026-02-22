@@ -24,7 +24,9 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    const redirectTo =
+      user.role === "patient" ? "/patient/profile" : "/clinician";
+    return <Navigate to={redirectTo} replace />;
   }
 
   return <>{children}</>;

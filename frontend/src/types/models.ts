@@ -1,0 +1,122 @@
+/**
+ * Core domain models — aligned with backend schemas.
+ */
+
+export interface UserProfile {
+  userId: string;
+  email: string;
+  role: "patient" | "clinician";
+}
+
+export interface Patient {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  allergies: string[];
+  insurancePlan: string | null;
+}
+
+export interface ExtractedData {
+  chiefComplaint: string;
+  currentMedications: string[];
+  allergies: string[];
+  diagnosis: string;
+}
+
+export type VisitStatus = "in_progress" | "completed" | "cancelled";
+
+export interface Visit {
+  id: string;
+  patientId: string;
+  clinicianId: string;
+  status: VisitStatus;
+  notes: string;
+  extractedData: ExtractedData | null;
+  createdAt: string;
+}
+
+export interface RecommendedDrug {
+  drugName: string;
+  genericName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  route: string;
+  rationale: string;
+  tier: number | null;
+  estimatedCopay: number | null;
+  isCovered: boolean | null;
+  requiresPriorAuth: boolean | null;
+}
+
+export interface AlternativeDrug {
+  drugName: string;
+  genericName: string;
+  dosage: string;
+  reason: string;
+  tier: number | null;
+  estimatedCopay: number | null;
+}
+
+export interface RecommendationOption {
+  primary: RecommendedDrug;
+  alternatives: AlternativeDrug[];
+  warnings: string[];
+}
+
+export interface SafetyCheck {
+  checkType: string;
+  passed: boolean;
+  severity: string | null;
+  message: string;
+}
+
+export interface ReceiptDrugItem {
+  drugName: string;
+  genericName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  route: string;
+  tier: number | null;
+  copay: number | null;
+  isCovered: boolean;
+  requiresPriorAuth: boolean;
+}
+
+export interface PrescriptionReceipt {
+  receiptId: string;
+  prescriptionId: string;
+  visitId: string;
+  patientId: string;
+  clinicianId: string;
+  patientName: string;
+  clinicianName: string;
+  issuedAt: string;
+  status: string;
+  drugs: ReceiptDrugItem[];
+  safety: {
+    allPassed: boolean;
+    checks: SafetyCheck[];
+    allergyFlags: string[];
+    interactionFlags: string[];
+    doseRangeFlags: string[];
+  };
+  coverage: {
+    planName: string;
+    memberId: string;
+    totalCopay: number;
+    itemsCovered: number;
+    itemsNotCovered: number;
+    priorAuthRequired: string[];
+  };
+  notes: string | null;
+}
+
+export interface PatientPack {
+  instructions: string;
+  warnings: string[];
+  medicationSchedule: string | null;
+}

@@ -1,77 +1,157 @@
-from fastapi import APIRouter, Depends
+"""Prescription router — /api/prescriptions (Part 2B §5).
 
-from pharmasense.dependencies.auth import AuthenticatedUser, get_current_user, require_role
+Each endpoint delegates to ``PrescriptionService`` and wraps the result in
+the standard ``ApiResponse`` envelope.
+"""
+
+from __future__ import annotations
+
+import logging
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException
+
+from pharmasense.exceptions import (
+    ResourceNotFoundError,
+    SafetyBlockError,
+    ValidationError,
+)
 from pharmasense.schemas.common import ApiResponse
-from pharmasense.schemas.recommendation import RecommendationRequest, RecommendationResponse
-from pharmasense.schemas.validation import ValidationRequest, ValidationResponse
+from pharmasense.schemas.gemini import PatientInstructionsOutput
+from pharmasense.schemas.prescription_ops import (
+    PrescriptionApprovalRequest,
+    PrescriptionRejectionRequest,
+)
 from pharmasense.schemas.receipt import PrescriptionReceipt
+from pharmasense.schemas.recommendation import (
+    RecommendationRequest,
+    RecommendationResponse,
+)
+from pharmasense.schemas.validation import (
+    ValidationRequest,
+    ValidationResponse,
+)
+from pharmasense.services.prescription_service import PrescriptionService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/prescriptions", tags=["prescriptions"])
 
 
-@router.post("/recommend")
+# ---------------------------------------------------------------------------
+# Dependency placeholder — overridden in ``main.py`` with real wiring
+# ---------------------------------------------------------------------------
+
+def _get_prescription_service() -> PrescriptionService:
+    raise NotImplementedError("PrescriptionService dependency not configured")
+
+
+# ---------------------------------------------------------------------------
+# POST /api/prescriptions/recommend
+# ---------------------------------------------------------------------------
+
+@router.post("/recommend", response_model=ApiResponse[RecommendationResponse])
 async def recommend(
-    body: RecommendationRequest,
-    user: AuthenticatedUser = Depends(require_role("clinician")),
+    request: RecommendationRequest,
+    svc: PrescriptionService = Depends(_get_prescription_service),
 ) -> ApiResponse[RecommendationResponse]:
-    return ApiResponse.ok(
-        RecommendationResponse(
-            visit_id=body.visit_id,
-            recommendations=[],
-        )
-    )
+    logger.info("Recommendation request for visit %s", request.visit_id)
+    try:
+        result = await svc.generate_recommendations(request)
+        return ApiResponse(success=True, data=result)
+    except ValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/validate")
+# ---------------------------------------------------------------------------
+# POST /api/prescriptions/validate
+# ---------------------------------------------------------------------------
+
+@router.post("/validate", response_model=ApiResponse[ValidationResponse])
 async def validate(
-    body: ValidationRequest,
-    user: AuthenticatedUser = Depends(require_role("clinician")),
+    request: ValidationRequest,
+    svc: PrescriptionService = Depends(_get_prescription_service),
 ) -> ApiResponse[ValidationResponse]:
-    return ApiResponse.ok(
-        ValidationResponse(
-            visit_id=body.visit_id,
-            patient_id=body.patient_id,
-            all_passed=True,
-            results=[],
-            blocked=False,
-        )
-    )
+    logger.info("Validation request for visit %s", request.visit_id)
+    try:
+        result = await svc.validate_prescriptions(request)
+        return ApiResponse(success=True, data=result)
+    except ValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/approve")
-async def approve(user: AuthenticatedUser = Depends(require_role("clinician"))) -> ApiResponse[dict]:
-    return ApiResponse.ok({})
+# ---------------------------------------------------------------------------
+# POST /api/prescriptions/approve
+# ---------------------------------------------------------------------------
+
+@router.post("/approve", response_model=ApiResponse[PrescriptionReceipt])
+async def approve(
+    request: PrescriptionApprovalRequest,
+    svc: PrescriptionService = Depends(_get_prescription_service),
+) -> ApiResponse[PrescriptionReceipt]:
+    logger.info("Approval request for prescription %s", request.prescription_id)
+    try:
+        receipt = await svc.approve_prescription(request)
+        return ApiResponse(success=True, data=receipt)
+    except ValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except SafetyBlockError as exc:
+        raise HTTPException(status_code=422, detail=exc.reason) from exc
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/reject")
-async def reject(user: AuthenticatedUser = Depends(require_role("clinician"))) -> ApiResponse[dict]:
-    return ApiResponse.ok({})
+# ---------------------------------------------------------------------------
+# POST /api/prescriptions/reject
+# ---------------------------------------------------------------------------
+
+@router.post("/reject", response_model=ApiResponse[None])
+async def reject(
+    request: PrescriptionRejectionRequest,
+    svc: PrescriptionService = Depends(_get_prescription_service),
+) -> ApiResponse[None]:
+    logger.info("Rejection request for prescription %s", request.prescription_id)
+    try:
+        await svc.reject_prescription(request)
+        return ApiResponse(success=True, data=None)
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("")
-async def list_prescriptions(user: AuthenticatedUser = Depends(get_current_user)) -> ApiResponse[list]:
-    return ApiResponse.ok([])
+# ---------------------------------------------------------------------------
+# GET /api/prescriptions/{prescription_id}/receipt
+# ---------------------------------------------------------------------------
 
-
-@router.get("/{prescription_id}")
-async def get_prescription(
-    prescription_id: str,
-    user: AuthenticatedUser = Depends(get_current_user),
-) -> ApiResponse[dict]:
-    return ApiResponse.ok({"prescription_id": prescription_id})
-
-
-@router.get("/{prescription_id}/receipt")
+@router.get("/{prescription_id}/receipt", response_model=ApiResponse[PrescriptionReceipt])
 async def get_receipt(
-    prescription_id: str,
-    user: AuthenticatedUser = Depends(get_current_user),
-) -> ApiResponse[PrescriptionReceipt | None]:
-    return ApiResponse.ok(None)
+    prescription_id: UUID,
+    svc: PrescriptionService = Depends(_get_prescription_service),
+) -> ApiResponse[PrescriptionReceipt]:
+    logger.info("Receipt request for prescription %s", prescription_id)
+    try:
+        receipt = await svc.get_receipt(prescription_id)
+        return ApiResponse(success=True, data=receipt)
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/{prescription_id}/patient-pack")
+# ---------------------------------------------------------------------------
+# POST /api/prescriptions/{prescription_id}/patient-pack
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/{prescription_id}/patient-pack",
+    response_model=ApiResponse[PatientInstructionsOutput],
+)
 async def generate_patient_pack(
-    prescription_id: str,
-    user: AuthenticatedUser = Depends(get_current_user),
-) -> ApiResponse[dict]:
-    return ApiResponse.ok({"prescription_id": prescription_id})
+    prescription_id: UUID,
+    svc: PrescriptionService = Depends(_get_prescription_service),
+) -> ApiResponse[PatientInstructionsOutput]:
+    logger.info("Patient pack request for prescription %s", prescription_id)
+    try:
+        pack = await svc.generate_patient_pack(prescription_id)
+        return ApiResponse(success=True, data=pack)
+    except ValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
