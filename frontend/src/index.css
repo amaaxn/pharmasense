@@ -1,47 +1,222 @@
 @import "tailwindcss";
 
+/* ============================================================
+   PharmaSense V2 — Design System Tokens (Spec §1)
+   
+   Tailwind CSS v4 @theme block: generates CSS custom properties
+   on :root AND utility classes (e.g. bg-bg-primary, text-h1).
+   Overrides in .high-contrast / .large-type / .dyslexia-font
+   swap the custom property values at runtime.
+   ============================================================ */
+
 @theme {
+  /* --- Fonts (§1.2) --- */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --font-dyslexia: "OpenDyslexic", sans-serif;
 
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  /* --- Colors: Backgrounds (§1.1) --- */
+  --color-bg-primary: #070609;
+  --color-bg-card: #121018;
+  --color-bg-input: #18141F;
+  --color-bg-elevated: #1F1828;
 
-  --color-success-500: #22c55e;
-  --color-warning-500: #f59e0b;
-  --color-danger-500: #ef4444;
+  /* --- Colors: Borders (§1.1) --- */
+  --color-border-default: #33273F;
+  --color-border-focus: #A855F7;
+
+  /* --- Colors: Text (§1.1) --- */
+  --color-text-primary: #F3EEF7;
+  --color-text-secondary: #B6A9C9;
+  --color-text-heading: #FFFFFF;
+
+  /* --- Colors: Accents (§1.1) --- */
+  --color-accent-purple: #A855F7;
+  --color-accent-plum: #7C3AED;
+  --color-accent-burgundy: #7F1D3A;
+  --color-accent-green: #22C55E;
+  --color-accent-red: #DC2626;
+  --color-accent-amber: #F59E0B;
+  --color-accent-maroon: #5B0F1F;
+
+  /* --- Colors: Safety status (§1.1) --- */
+  --color-safety-pass: #22C55E;
+  --color-safety-fail: #DC2626;
+  --color-safety-warn: #F59E0B;
+
+  /* --- Colors: Coverage status (§1.1) --- */
+  --color-coverage-covered: #22C55E;
+  --color-coverage-not-covered: #B91C1C;
+  --color-coverage-prior-auth: #F59E0B;
+  --color-coverage-unknown: #9CA3AF;
+
+  /* --- Colors: Tier (§1.1) --- */
+  --color-tier-1: #22C55E;
+  --color-tier-2: #A855F7;
+  --color-tier-3: #F59E0B;
+  --color-tier-4: #DC2626;
+
+  /* --- Typography scale (§1.2) --- */
+  --text-display: 3rem;
+  --text-display--line-height: 1.1;
+  --text-display--font-weight: 700;
+
+  --text-h1: 2rem;
+  --text-h1--line-height: 1.2;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 1.3;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.4;
+  --text-h3--font-weight: 600;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.5;
+
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.43;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.33;
+  --text-xs--font-weight: 500;
+
+  --text-mono: 0.875rem;
+  --text-mono--line-height: 1.43;
+
+  /* --- Shadows (§1.5) --- */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow-purple: 0 0 16px rgba(168, 85, 247, 0.35);
+  --shadow-glow-green: 0 0 16px rgba(34, 197, 94, 0.35);
+  --shadow-glow-red: 0 0 16px rgba(220, 38, 38, 0.35);
 }
+
+/* ============================================================
+   Base styles
+   ============================================================ */
 
 :root {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
 }
 
+/* ============================================================
+   High-contrast mode overrides (§1.1)
+   Activated by adding class="high-contrast" on <html>
+   ============================================================ */
+
+.high-contrast {
+  --color-bg-primary: #000000;
+  --color-text-primary: #FFFFFF;
+  --color-border-default: #FFFFFF;
+  --color-accent-purple: #C084FC;
+}
+
+/* ============================================================
+   Large type mode (§1.2)
+   Activated by adding class="large-type" on <html>
+   Multiplies all font sizes by 1.25x.
+   ============================================================ */
+
+.large-type {
+  --text-display: 3.75rem;
+  --text-h1: 2.5rem;
+  --text-h2: 1.875rem;
+  --text-h3: 1.5625rem;
+  --text-body: 1.25rem;
+  --text-body-lg: 1.40625rem;
+  --text-sm: 1.09375rem;
+  --text-xs: 0.9375rem;
+  --text-mono: 1.09375rem;
+}
+
+/* ============================================================
+   Dyslexia font mode (§1.2)
+   Activated by adding class="dyslexia-font" on <html>
+   Swaps the primary sans-serif font to OpenDyslexic.
+   ============================================================ */
+
+.dyslexia-font {
+  --font-sans: "OpenDyslexic", sans-serif;
+}
+
+/* ============================================================
+   Focus-visible ring (uses border-focus token)
+   ============================================================ */
+
 *:focus-visible {
-  outline: 2px solid var(--color-primary-500);
+  outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }
+
+/* ============================================================
+   Skip link (accessibility — §3.2)
+   ============================================================ */
 
 .skip-link {
   position: absolute;
   left: -9999px;
   z-index: 999;
   padding: 0.5rem 1rem;
-  background: var(--color-primary-600);
+  background: var(--color-accent-purple);
   color: white;
   text-decoration: none;
+  border-radius: 0 0 8px 0;
+  font-weight: 600;
 }
 
 .skip-link:focus {
-  left: 0.5rem;
-  top: 0.5rem;
+  left: 0;
+  top: 0;
+}
+
+/* ============================================================
+   Reduced motion (§3.4)
+   Respect OS-level preference + manual toggle
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* ============================================================
+   Visually hidden utility (for screen-reader-only content)
+   ============================================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

@@ -1,15 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type Language = "en" | "es";
+
 interface UiState {
   highContrast: boolean;
   dyslexiaFont: boolean;
-  fontSize: "normal" | "large" | "x-large";
+  largeType: boolean;
+  reduceMotion: boolean;
+  language: Language;
   sidebarOpen: boolean;
 
   toggleHighContrast: () => void;
   toggleDyslexiaFont: () => void;
-  setFontSize: (size: "normal" | "large" | "x-large") => void;
+  toggleLargeType: () => void;
+  toggleReduceMotion: () => void;
+  toggleLanguage: () => void;
+  setLanguage: (lang: Language) => void;
   toggleSidebar: () => void;
 }
 
@@ -18,16 +25,32 @@ export const useUiStore = create<UiState>()(
     (set) => ({
       highContrast: false,
       dyslexiaFont: false,
-      fontSize: "normal",
-      sidebarOpen: true,
+      largeType: false,
+      reduceMotion: false,
+      language: "en",
+      sidebarOpen: false,
 
       toggleHighContrast: () =>
         set((s) => ({ highContrast: !s.highContrast })),
       toggleDyslexiaFont: () =>
         set((s) => ({ dyslexiaFont: !s.dyslexiaFont })),
-      setFontSize: (fontSize) => set({ fontSize }),
+      toggleLargeType: () => set((s) => ({ largeType: !s.largeType })),
+      toggleReduceMotion: () =>
+        set((s) => ({ reduceMotion: !s.reduceMotion })),
+      toggleLanguage: () =>
+        set((s) => ({ language: s.language === "en" ? "es" : "en" })),
+      setLanguage: (language) => set({ language }),
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
     }),
-    { name: "pharmasense-ui" },
+    {
+      name: "pharmasense-ui",
+      partialize: (state) => ({
+        highContrast: state.highContrast,
+        dyslexiaFont: state.dyslexiaFont,
+        largeType: state.largeType,
+        reduceMotion: state.reduceMotion,
+        language: state.language,
+      }),
+    },
   ),
 );

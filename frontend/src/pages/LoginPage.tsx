@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
+import { PageTransition } from "../components/PageTransition";
 
 export function LoginPage() {
   const { isAuthenticated, user, signIn, signUp } = useAuthStore();
@@ -44,6 +45,7 @@ export function LoginPage() {
   };
 
   return (
+    <PageTransition>
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
         <h1 className="text-center text-3xl font-bold tracking-tight text-primary-900">
@@ -171,5 +173,6 @@ export function LoginPage() {
         </p>
       </div>
     </main>
+    </PageTransition>
   );
 }
