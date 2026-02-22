@@ -42,3 +42,6 @@ alembic/versions/__pycache__/
 backend/static/
 *.pdf
 *.mp3
+
+specs/
+specs/*
