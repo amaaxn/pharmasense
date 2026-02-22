@@ -16,6 +16,8 @@ export type {
   CoverageStatus,
   RecommendationOption,
   ReceiptDrugItem,
+  ReceiptAlternative,
+  ReceiptReasoning,
   PrescriptionReceipt,
   PatientPack,
 } from "../api/prescriptions";

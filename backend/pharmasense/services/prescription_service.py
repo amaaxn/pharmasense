@@ -36,8 +36,10 @@ from pharmasense.schemas.prescription_ops import (
 )
 from pharmasense.schemas.receipt import (
     PrescriptionReceipt,
+    ReceiptAlternative,
     ReceiptCoverageSummary,
     ReceiptDrugItem,
+    ReceiptReasoning,
     ReceiptSafetySummary,
     SafetyCheck as ReceiptSafetyCheck,
 )
@@ -595,6 +597,30 @@ class PrescriptionService:
 
         all_passed = not allergy_flags and not interaction_flags and not dose_flags
 
+        # Build alternatives from recommendation items
+        receipt_alternatives: list[ReceiptAlternative] = []
+        for item in rx.get("items", []):
+            alts = item.get("alternatives", []) if isinstance(item, dict) else []
+            for alt in alts:
+                if isinstance(alt, dict):
+                    receipt_alternatives.append(ReceiptAlternative(
+                        drug_name=alt.get("drug_name", ""),
+                        copay=alt.get("estimated_copay"),
+                        coverage_status=alt.get("coverage_status", "UNKNOWN"),
+                        reason=alt.get("reason", ""),
+                    ))
+
+        # Build reasoning from the prescription's rationale
+        reasoning = None
+        first_item = rx.get("items", [None])[0] if rx.get("items") else None
+        if first_item and isinstance(first_item, dict):
+            rationale = first_item.get("rationale", "")
+            if rationale:
+                reasoning = ReceiptReasoning(
+                    clinician_summary=rationale,
+                    patient_explanation=rationale,
+                )
+
         return PrescriptionReceipt(
             receipt_id=uuid.uuid4(),
             prescription_id=prescription_id,
@@ -621,4 +647,6 @@ class PrescriptionService:
                 items_not_covered=items_not_covered,
                 prior_auth_required=prior_auth_drugs,
             ),
+            alternatives=receipt_alternatives,
+            reasoning=reasoning,
         )

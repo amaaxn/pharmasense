@@ -89,6 +89,79 @@ export interface Dictionary {
   patientInstructions: string;
   whyThisIsSafe: string;
 
+  // ── Savings / cost shock prevention ─────────────────────
+  coverageSavings: string;
+  coveragePerMonth: string;
+  coveragePerYear: string;
+  priorAuthNotRequired: string;
+  priorAuthRequired: string;
+
+  // ── Prescription receipt ─────────────────────────────────
+  receiptMedicationHeader: string;
+  receiptCoverage: string;
+  receiptSafetyChecks: string;
+  receiptAlternatives: string;
+  receiptNoAlternatives: string;
+  receiptReasoning: string;
+  receiptForClinician: string;
+  receiptForPatient: string;
+  receiptShowPatientPack: string;
+  receiptHidePatientPack: string;
+  receiptApprovedBy: string;
+  receiptIssuedOn: string;
+  receiptDownloadPdf: string;
+  receiptPdfDownloading: string;
+
+  // ── Patient pack ─────────────────────────────────────────
+  patientPackTitle: string;
+  patientPackPurpose: string;
+  patientPackHowToTake: string;
+  patientPackSchedule: string;
+  patientPackWhatToAvoid: string;
+  patientPackSideEffects: string;
+  patientPackSideEffectsNormal: string;
+  patientPackSideEffectsSeekHelp: string;
+  patientPackStorage: string;
+  patientPackVoiceListen: string;
+  patientPackVoiceGenerating: string;
+  patientPackVoicePause: string;
+  patientPackVoicePlay: string;
+  patientPackVoiceSpeed: string;
+  patientPackVoiceRegenerate: string;
+  patientPackPronounce: string;
+
+  // ── Patient pages ────────────────────────────────────────
+  patientProfileTitle: string;
+  patientInsuranceTitle: string;
+  patientInsuranceScan: string;
+  patientInsuranceUpload: string;
+  patientInsuranceScanning: string;
+  patientInsuranceReview: string;
+  patientInsuranceSave: string;
+  patientInsuranceProvider: string;
+  patientInsurancePolicyNumber: string;
+  patientInsuranceGroupNumber: string;
+  patientAllergiesTitle: string;
+  patientAllergiesAdd: string;
+  patientAllergiesAddPlaceholder: string;
+  patientAllergiesRemoveConfirm: string;
+  patientAllergiesNone: string;
+  patientLanguageTitle: string;
+  patientPrescriptionsTitle: string;
+  patientPrescriptionsNone: string;
+  patientPrescriptionsViewReceipt: string;
+  patientPrescriptionsListen: string;
+  patientPrescriptionsReminder: string;
+  patientPrescriptionsChat: string;
+  patientVisitsTitle: string;
+  patientVisitsNone: string;
+  patientVisitsViewDetail: string;
+  reminderTitle: string;
+  reminderTime: string;
+  reminderSave: string;
+  reminderCancel: string;
+  reminderSaved: string;
+
   // ── Visit workflow ────────────────────────────────────────
   visitNotes: string;
   visitExtractData: string;
@@ -292,6 +365,79 @@ const en: Dictionary = {
   copay: "Copay",
   patientInstructions: "Patient Instructions",
   whyThisIsSafe: "Why this is safe",
+
+  // Savings / cost shock prevention
+  coverageSavings: "This alternative saves about",
+  coveragePerMonth: "per month",
+  coveragePerYear: "per year",
+  priorAuthNotRequired: "Prior authorization: Not required",
+  priorAuthRequired: "Prior authorization likely required",
+
+  // Prescription receipt
+  receiptMedicationHeader: "Medication",
+  receiptCoverage: "Coverage",
+  receiptSafetyChecks: "Safety Checks",
+  receiptAlternatives: "Alternatives Considered",
+  receiptNoAlternatives: "No alternatives considered — this was the optimal choice.",
+  receiptReasoning: "Reasoning",
+  receiptForClinician: "For Clinician",
+  receiptForPatient: "For Patient",
+  receiptShowPatientPack: "Show Patient Pack",
+  receiptHidePatientPack: "Hide Patient Pack",
+  receiptApprovedBy: "Approved by",
+  receiptIssuedOn: "Issued on",
+  receiptDownloadPdf: "Download PDF",
+  receiptPdfDownloading: "Generating PDF…",
+
+  // Patient pack
+  patientPackTitle: "Your Medication Guide",
+  patientPackPurpose: "What This Medication Is For",
+  patientPackHowToTake: "How to Take It",
+  patientPackSchedule: "Today's Schedule",
+  patientPackWhatToAvoid: "What to Avoid",
+  patientPackSideEffects: "Side Effects",
+  patientPackSideEffectsNormal: "Normal (usually harmless)",
+  patientPackSideEffectsSeekHelp: "Seek Help Immediately",
+  patientPackStorage: "Storage",
+  patientPackVoiceListen: "Listen to Instructions",
+  patientPackVoiceGenerating: "Generating voice…",
+  patientPackVoicePause: "Pause",
+  patientPackVoicePlay: "Play",
+  patientPackVoiceSpeed: "Speed",
+  patientPackVoiceRegenerate: "Regenerate in {lang}",
+  patientPackPronounce: "Pronounce medication name",
+
+  // Patient pages
+  patientProfileTitle: "My Profile",
+  patientInsuranceTitle: "Insurance Information",
+  patientInsuranceScan: "Scan Insurance Card",
+  patientInsuranceUpload: "Upload Photo",
+  patientInsuranceScanning: "Scanning card…",
+  patientInsuranceReview: "Review extracted information before saving",
+  patientInsuranceSave: "Review and Save",
+  patientInsuranceProvider: "Provider",
+  patientInsurancePolicyNumber: "Policy Number",
+  patientInsuranceGroupNumber: "Group Number",
+  patientAllergiesTitle: "Allergies",
+  patientAllergiesAdd: "Add",
+  patientAllergiesAddPlaceholder: "Add an allergy…",
+  patientAllergiesRemoveConfirm: "Remove this allergy?",
+  patientAllergiesNone: "No known allergies",
+  patientLanguageTitle: "Language Preference",
+  patientPrescriptionsTitle: "My Prescriptions",
+  patientPrescriptionsNone: "No prescriptions yet.",
+  patientPrescriptionsViewReceipt: "View Receipt",
+  patientPrescriptionsListen: "Listen",
+  patientPrescriptionsReminder: "Reminder",
+  patientPrescriptionsChat: "Chat",
+  patientVisitsTitle: "My Visits",
+  patientVisitsNone: "No visits yet.",
+  patientVisitsViewDetail: "View Details",
+  reminderTitle: "Set Medication Reminder",
+  reminderTime: "Reminder time",
+  reminderSave: "Save Reminder",
+  reminderCancel: "Cancel",
+  reminderSaved: "Reminder saved!",
 
   // Visit workflow
   visitNotes: "Visit Notes",
@@ -498,6 +644,79 @@ const es: Dictionary = {
   copay: "Copago",
   patientInstructions: "Instrucciones para el Paciente",
   whyThisIsSafe: "Por qué esto es seguro",
+
+  // Ahorro / prevención de sorpresa de costos
+  coverageSavings: "Esta alternativa ahorra aproximadamente",
+  coveragePerMonth: "por mes",
+  coveragePerYear: "por año",
+  priorAuthNotRequired: "Autorización previa: No requerida",
+  priorAuthRequired: "Autorización previa probablemente requerida",
+
+  // Recibo de receta
+  receiptMedicationHeader: "Medicamento",
+  receiptCoverage: "Cobertura",
+  receiptSafetyChecks: "Verificaciones de Seguridad",
+  receiptAlternatives: "Alternativas Consideradas",
+  receiptNoAlternatives: "No se consideraron alternativas — esta fue la opción óptima.",
+  receiptReasoning: "Razonamiento",
+  receiptForClinician: "Para el Médico",
+  receiptForPatient: "Para el Paciente",
+  receiptShowPatientPack: "Mostrar Paquete del Paciente",
+  receiptHidePatientPack: "Ocultar Paquete del Paciente",
+  receiptApprovedBy: "Aprobado por",
+  receiptIssuedOn: "Emitido el",
+  receiptDownloadPdf: "Descargar PDF",
+  receiptPdfDownloading: "Generando PDF…",
+
+  // Paquete del paciente
+  patientPackTitle: "Su Guía de Medicamento",
+  patientPackPurpose: "Para Qué Es Este Medicamento",
+  patientPackHowToTake: "Cómo Tomarlo",
+  patientPackSchedule: "Horario de Hoy",
+  patientPackWhatToAvoid: "Qué Evitar",
+  patientPackSideEffects: "Efectos Secundarios",
+  patientPackSideEffectsNormal: "Normal (generalmente inofensivo)",
+  patientPackSideEffectsSeekHelp: "Busque Ayuda Inmediata",
+  patientPackStorage: "Almacenamiento",
+  patientPackVoiceListen: "Escuchar Instrucciones",
+  patientPackVoiceGenerating: "Generando voz…",
+  patientPackVoicePause: "Pausar",
+  patientPackVoicePlay: "Reproducir",
+  patientPackVoiceSpeed: "Velocidad",
+  patientPackVoiceRegenerate: "Regenerar en {lang}",
+  patientPackPronounce: "Pronunciar nombre del medicamento",
+
+  // Páginas del paciente
+  patientProfileTitle: "Mi Perfil",
+  patientInsuranceTitle: "Información del Seguro",
+  patientInsuranceScan: "Escanear Tarjeta de Seguro",
+  patientInsuranceUpload: "Subir Foto",
+  patientInsuranceScanning: "Escaneando tarjeta…",
+  patientInsuranceReview: "Revise la información extraída antes de guardar",
+  patientInsuranceSave: "Revisar y Guardar",
+  patientInsuranceProvider: "Proveedor",
+  patientInsurancePolicyNumber: "Número de Póliza",
+  patientInsuranceGroupNumber: "Número de Grupo",
+  patientAllergiesTitle: "Alergias",
+  patientAllergiesAdd: "Agregar",
+  patientAllergiesAddPlaceholder: "Agregar una alergia…",
+  patientAllergiesRemoveConfirm: "¿Eliminar esta alergia?",
+  patientAllergiesNone: "Sin alergias conocidas",
+  patientLanguageTitle: "Preferencia de Idioma",
+  patientPrescriptionsTitle: "Mis Recetas",
+  patientPrescriptionsNone: "Aún no hay recetas.",
+  patientPrescriptionsViewReceipt: "Ver Recibo",
+  patientPrescriptionsListen: "Escuchar",
+  patientPrescriptionsReminder: "Recordatorio",
+  patientPrescriptionsChat: "Chat",
+  patientVisitsTitle: "Mis Visitas",
+  patientVisitsNone: "Aún no hay visitas.",
+  patientVisitsViewDetail: "Ver Detalles",
+  reminderTitle: "Configurar Recordatorio de Medicamento",
+  reminderTime: "Hora del recordatorio",
+  reminderSave: "Guardar Recordatorio",
+  reminderCancel: "Cancelar",
+  reminderSaved: "¡Recordatorio guardado!",
 
   // Flujo de visitas
   visitNotes: "Notas de Visita",

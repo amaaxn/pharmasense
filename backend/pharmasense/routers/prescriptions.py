@@ -10,6 +10,7 @@ import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 
 from pharmasense.exceptions import (
     ResourceNotFoundError,
@@ -153,5 +154,32 @@ async def generate_patient_pack(
         return ApiResponse(success=True, data=pack)
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# POST /api/prescriptions/{prescription_id}/pdf
+# ---------------------------------------------------------------------------
+
+@router.post("/{prescription_id}/pdf")
+async def download_prescription_pdf(
+    prescription_id: UUID,
+    svc: PrescriptionService = Depends(_get_prescription_service),
+) -> Response:
+    logger.info("PDF request for prescription %s", prescription_id)
+    try:
+        from pharmasense.services.pdf_service import PdfService
+
+        receipt = await svc.get_receipt(prescription_id)
+        instructions = await svc.generate_patient_pack(prescription_id)
+        pdf_bytes = PdfService().generate(receipt, instructions)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="prescription_{prescription_id}.pdf"'
+            },
+        )
     except ResourceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

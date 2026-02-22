@@ -12,8 +12,10 @@ from .prescription_ops import (
 )
 from .receipt import (
     PrescriptionReceipt,
+    ReceiptAlternative,
     ReceiptCoverageSummary,
     ReceiptDrugItem,
+    ReceiptReasoning,
     ReceiptSafetySummary,
     SafetyCheck,
 )
@@ -31,6 +33,7 @@ from .validation import (
     ValidationRequest,
     ValidationResponse,
 )
+from .voice import VoiceRequest, VoiceResponse
 
 __all__ = [
     "ApiResponse",
@@ -43,8 +46,10 @@ __all__ = [
     "PrescriptionApprovalRequest",
     "PrescriptionRejectionRequest",
     "PrescriptionReceipt",
+    "ReceiptAlternative",
     "ReceiptCoverageSummary",
     "ReceiptDrugItem",
+    "ReceiptReasoning",
     "ReceiptSafetySummary",
     "SafetyCheck",
     "AlternativeDrug",
@@ -57,4 +62,6 @@ __all__ = [
     "ValidationFlag",
     "ValidationRequest",
     "ValidationResponse",
+    "VoiceRequest",
+    "VoiceResponse",
 ]

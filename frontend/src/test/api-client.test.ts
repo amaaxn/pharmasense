@@ -199,7 +199,17 @@ describe("§6.2 api/prescriptions.ts", () => {
   });
 
   it("generatePatientPack calls POST /prescriptions/:id/patient-pack", async () => {
-    const pack = { instructions: "Take with food", warnings: [], medicationSchedule: null };
+    const pack = {
+      medicationName: "Lisinopril",
+      purpose: "Blood pressure control",
+      howToTake: "Take one tablet daily",
+      whatToAvoid: [],
+      sideEffects: [],
+      whenToSeekHelp: [],
+      storageInstructions: "Room temperature",
+      dailySchedule: null,
+      language: "en",
+    };
     mockPost.mockResolvedValueOnce(pack);
 
     const result = await prescriptionsApi.generatePatientPack("rx1");
@@ -281,16 +291,16 @@ describe("§6.2 api/voice.ts", () => {
       prescriptionId: "rx1",
       language: "en",
     };
-    const pack = { voiceId: "vp1", audioUrl: "/audio/vp1.mp3", language: "en" };
+    const pack = { audioUrl: "/audio/vp1.mp3", prescriptionId: "rx1" };
     mockPost.mockResolvedValueOnce(pack);
 
     const result = await voiceApi.generateVoicePack(payload);
     expect(mockPost).toHaveBeenCalledWith("/voice/generate", payload);
-    expect(result.voiceId).toBe("vp1");
+    expect(result.audioUrl).toBe("/audio/vp1.mp3");
   });
 
   it("getVoicePack calls GET /voice/:id", async () => {
-    const pack = { voiceId: "vp1", audioUrl: "/audio/vp1.mp3", language: "en" };
+    const pack = { audioUrl: "/audio/vp1.mp3", prescriptionId: "rx1" };
     mockGet.mockResolvedValueOnce(pack);
 
     const result = await voiceApi.getVoicePack("vp1");
