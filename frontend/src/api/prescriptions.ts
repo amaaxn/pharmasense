@@ -1,9 +1,108 @@
 import apiClient from "./client";
-import type {
-  PrescriptionReceipt,
-  PatientPack,
-  RecommendationOption,
-} from "../stores/prescriptionStore";
+
+// ── Shared types (canonical definitions) ──────────────────
+
+export interface RecommendedDrug {
+  drugName: string;
+  genericName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  route: string;
+  rationale: string;
+  tier: number | null;
+  estimatedCopay: number | null;
+  isCovered: boolean | null;
+  requiresPriorAuth: boolean | null;
+}
+
+export interface AlternativeDrug {
+  drugName: string;
+  genericName: string;
+  dosage: string;
+  reason: string;
+  tier: number | null;
+  estimatedCopay: number | null;
+}
+
+export interface SafetyCheck {
+  checkType: string;
+  passed: boolean;
+  severity: string | null;
+  message: string;
+}
+
+export type RecommendationLabel =
+  | "BEST_COVERED"
+  | "CHEAPEST"
+  | "CLINICAL_BACKUP";
+
+export type CoverageStatus =
+  | "COVERED"
+  | "NOT_COVERED"
+  | "PRIOR_AUTH_REQUIRED"
+  | "UNKNOWN";
+
+export interface RecommendationOption {
+  label?: RecommendationLabel;
+  primary: RecommendedDrug;
+  alternatives: AlternativeDrug[];
+  warnings: string[];
+  safetyChecks?: SafetyCheck[];
+  blocked?: boolean;
+  blockReason?: string;
+  rationale?: string;
+}
+
+export interface ReceiptDrugItem {
+  drugName: string;
+  genericName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  route: string;
+  tier: number | null;
+  copay: number | null;
+  isCovered: boolean;
+  requiresPriorAuth: boolean;
+}
+
+export interface PrescriptionReceipt {
+  receiptId: string;
+  prescriptionId: string;
+  visitId: string;
+  patientId: string;
+  clinicianId: string;
+  patientName: string;
+  clinicianName: string;
+  issuedAt: string;
+  status: string;
+  drugs: ReceiptDrugItem[];
+  safety: {
+    allPassed: boolean;
+    checks: SafetyCheck[];
+    allergyFlags: string[];
+    interactionFlags: string[];
+    doseRangeFlags: string[];
+  };
+  coverage: {
+    planName: string;
+    memberId: string;
+    totalCopay: number;
+    itemsCovered: number;
+    itemsNotCovered: number;
+    priorAuthRequired: string[];
+  };
+  notes: string | null;
+}
+
+export interface PatientPack {
+  instructions: string;
+  warnings: string[];
+  medicationSchedule: string | null;
+}
+
+// ── Request / response types ──────────────────────────────
 
 export interface RecommendRequest {
   visit_id: string;
@@ -71,6 +170,21 @@ export interface ValidateResponse {
   blockReasons: string[];
 }
 
+export interface PrescriptionSummary {
+  prescriptionId: string;
+  drugName: string;
+  genericName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  status: string;
+  isCovered: boolean | null;
+  estimatedCopay: number | null;
+  tier: number | null;
+}
+
+// ── API functions ─────────────────────────────────────────
+
 export async function recommend(
   payload: RecommendRequest,
 ): Promise<RecommendResponse> {
@@ -116,4 +230,12 @@ export async function generatePatientPack(
   return await apiClient.post(
     `/prescriptions/${prescriptionId}/patient-pack`,
   ) as unknown as PatientPack;
+}
+
+export async function listPrescriptionsByVisit(
+  visitId: string,
+): Promise<PrescriptionSummary[]> {
+  return await apiClient.get(
+    `/visits/${visitId}/prescriptions`,
+  ) as unknown as PrescriptionSummary[];
 }

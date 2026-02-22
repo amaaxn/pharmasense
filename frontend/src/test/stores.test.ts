@@ -407,10 +407,16 @@ describe("§5.4 prescriptionStore", () => {
       const err = { response: { status: 422 }, message: "Blocked" };
       mockApi.post.mockRejectedValueOnce(err);
 
-      await expect(
-        act(() => usePrescriptionStore.getState().approveOption("rx1", true)),
-      ).rejects.toBeDefined();
+      let caught: unknown;
+      try {
+        await act(() =>
+          usePrescriptionStore.getState().approveOption("rx1", true),
+        );
+      } catch (e) {
+        caught = e;
+      }
 
+      expect(caught).toBeDefined();
       expect(usePrescriptionStore.getState().status).toBe("blocked");
       expect(usePrescriptionStore.getState().error).toBe("Prescription blocked");
     });

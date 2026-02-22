@@ -10,8 +10,13 @@ export interface Patient {
   insurancePlan: string | null;
 }
 
-export async function listPatients(): Promise<Patient[]> {
-  return await apiClient.get("/patients") as unknown as Patient[];
+export async function listPatients(params?: { search?: string }): Promise<Patient[]> {
+  const query = params?.search ? `?search=${encodeURIComponent(params.search)}` : "";
+  return await apiClient.get(`/patients${query}`) as unknown as Patient[];
+}
+
+export async function searchPatients(query: string): Promise<Patient[]> {
+  return listPatients({ search: query });
 }
 
 export async function getPatient(patientId: string): Promise<Patient> {
