@@ -7,22 +7,17 @@ the standard ``ApiResponse`` envelope.
 from __future__ import annotations
 
 import logging
-from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from pharmasense.config import settings
-from pharmasense.dependencies.database import get_db
 from pharmasense.exceptions import (
     ResourceNotFoundError,
     SafetyBlockError,
     ValidationError,
 )
-from pharmasense.models import DrugInteraction, DoseRange, FormularyEntry
 from pharmasense.schemas.common import ApiResponse
 from pharmasense.schemas.formulary_service import FormularyEntryData
 from pharmasense.schemas.gemini import PatientInstructionsOutput
@@ -42,6 +37,7 @@ from pharmasense.schemas.validation import (
 )
 from pharmasense.services.analytics_service import AnalyticsService
 from pharmasense.services.formulary_service import FormularyService
+from pharmasense.services.supabase_client import SupabaseClient, get_supabase
 from pharmasense.services.gemini_service import GeminiService
 from pharmasense.services.prescription_service import PrescriptionService
 from pharmasense.services.rules_engine_service import RulesEngineService
@@ -66,10 +62,8 @@ def _get_shared_store():
     return _shared_store
 
 
-def _get_prescription_service(
-    db: AsyncSession = Depends(get_db),
-) -> PrescriptionService:
-    analytics = AnalyticsService(session=db)
+def _get_prescription_service() -> PrescriptionService:
+    analytics = AnalyticsService(session=None)
     return PrescriptionService(
         gemini_service=_gemini,
         rules_engine=_rules,
@@ -79,51 +73,48 @@ def _get_prescription_service(
     )
 
 
-async def _load_formulary(db: AsyncSession) -> list[FormularyEntryData]:
-    result = await db.execute(select(FormularyEntry))
-    rows = result.scalars().all()
+async def _load_formulary(supa: SupabaseClient) -> list[FormularyEntryData]:
+    rows = await supa.select("formulary_entries")
     return [
         FormularyEntryData(
-            drug_name=row.medication_name,
-            generic_name=row.generic_name,
-            plan_name=row.plan_name,
-            tier=row.tier,
-            copay=float(row.copay),
-            is_covered=row.covered,
-            requires_prior_auth=row.prior_auth_required,
-            quantity_limit=row.quantity_limit,
-            step_therapy_required=row.step_therapy_required,
+            drug_name=r["medication_name"],
+            generic_name=r.get("generic_name", ""),
+            plan_name=r.get("plan_name", ""),
+            tier=r["tier"],
+            copay=float(r.get("copay", 0)),
+            is_covered=r.get("covered", True),
+            requires_prior_auth=r.get("prior_auth_required", False),
+            quantity_limit=r.get("quantity_limit", ""),
+            step_therapy_required=r.get("step_therapy_required", False),
         )
-        for row in rows
+        for r in rows
     ]
 
 
-async def _load_interactions(db: AsyncSession) -> list[DrugInteractionData]:
-    result = await db.execute(select(DrugInteraction))
-    rows = result.scalars().all()
+async def _load_interactions(supa: SupabaseClient) -> list[DrugInteractionData]:
+    rows = await supa.select("drug_interactions")
     return [
         DrugInteractionData(
-            drug_a=row.drug_a,
-            drug_b=row.drug_b,
-            severity=row.severity,
-            description=row.description,
+            drug_a=r["drug_a"],
+            drug_b=r["drug_b"],
+            severity=r["severity"],
+            description=r["description"],
         )
-        for row in rows
+        for r in rows
     ]
 
 
-async def _load_dose_ranges(db: AsyncSession) -> list[DoseRangeData]:
-    result = await db.execute(select(DoseRange))
-    rows = result.scalars().all()
+async def _load_dose_ranges(supa: SupabaseClient) -> list[DoseRangeData]:
+    rows = await supa.select("dose_ranges")
     return [
         DoseRangeData(
-            medication_name=row.medication_name,
-            min_dose_mg=row.min_dose_mg,
-            max_dose_mg=row.max_dose_mg,
-            unit=row.unit,
-            frequency=row.frequency,
+            medication_name=r["medication_name"],
+            min_dose_mg=r["min_dose_mg"],
+            max_dose_mg=r["max_dose_mg"],
+            unit=r.get("unit", "mg"),
+            frequency=r.get("frequency", "once daily"),
         )
-        for row in rows
+        for r in rows
     ]
 
 
@@ -135,13 +126,13 @@ async def _load_dose_ranges(db: AsyncSession) -> list[DoseRangeData]:
 async def recommend(
     request: RecommendationRequest,
     svc: PrescriptionService = Depends(_get_prescription_service),
-    db: AsyncSession = Depends(get_db),
+    supa: SupabaseClient = Depends(get_supabase),
 ) -> ApiResponse[RecommendationResponse]:
     logger.info("Recommendation request for visit %s", request.visit_id)
     try:
-        formulary = await _load_formulary(db)
-        interactions = await _load_interactions(db)
-        dose_ranges = await _load_dose_ranges(db)
+        formulary = await _load_formulary(supa)
+        interactions = await _load_interactions(supa)
+        dose_ranges = await _load_dose_ranges(supa)
         result = await svc.generate_recommendations(
             request,
             formulary=formulary,
@@ -161,13 +152,13 @@ async def recommend(
 async def validate(
     request: ValidationRequest,
     svc: PrescriptionService = Depends(_get_prescription_service),
-    db: AsyncSession = Depends(get_db),
+    supa: SupabaseClient = Depends(get_supabase),
 ) -> ApiResponse[ValidationResponse]:
     logger.info("Validation request for visit %s", request.visit_id)
     try:
-        formulary = await _load_formulary(db)
-        interactions = await _load_interactions(db)
-        dose_ranges = await _load_dose_ranges(db)
+        formulary = await _load_formulary(supa)
+        interactions = await _load_interactions(supa)
+        dose_ranges = await _load_dose_ranges(supa)
         result = await svc.validate_prescriptions(
             request,
             drug_interactions=interactions,
@@ -187,10 +178,44 @@ async def validate(
 async def approve(
     request: PrescriptionApprovalRequest,
     svc: PrescriptionService = Depends(_get_prescription_service),
+    supa: SupabaseClient = Depends(get_supabase),
 ) -> ApiResponse[PrescriptionReceipt]:
     logger.info("Approval request for prescription %s", request.prescription_id)
     try:
         receipt = await svc.approve_prescription(request)
+        # Persist to Supabase so prescription counts + details survive server restarts
+        try:
+            logger.info("Persisting prescription %s to Supabase", receipt.prescription_id)
+            await supa.upsert("prescriptions", {
+                "id": str(receipt.prescription_id),
+                "visit_id": str(receipt.visit_id),
+                "patient_id": str(receipt.patient_id),
+                "clinician_id": str(receipt.clinician_id),
+                "status": "approved",
+                "approved_at": receipt.issued_at.isoformat(),
+            }, on_conflict="id")
+            # Write each recommended drug as a prescription_item row
+            rx_data = _get_shared_store().get_prescription(request.prescription_id)
+            logger.info("rx_data found: %s, items: %d", rx_data is not None, len(rx_data.get("items", [])) if rx_data else 0)
+            if rx_data:
+                for item_dict in rx_data.get("items", []):
+                    primary = item_dict.get("primary", {}) if isinstance(item_dict, dict) else {}
+                    if not primary:
+                        continue
+                    await supa.insert("prescription_items", {
+                        "prescription_id": str(receipt.prescription_id),
+                        "drug_name": primary.get("drug_name", "Unknown"),
+                        "generic_name": primary.get("generic_name", ""),
+                        "dosage": primary.get("dosage", ""),
+                        "frequency": primary.get("frequency", ""),
+                        "duration": primary.get("duration", ""),
+                        "route": primary.get("route", "oral"),
+                        "tier": primary.get("tier"),
+                        "copay": primary.get("estimated_copay"),
+                        "is_covered": bool(primary.get("is_covered", True)),
+                    })
+        except Exception as exc:
+            logger.warning("Failed to persist prescription to Supabase: %s", exc)
         return ApiResponse(success=True, data=receipt)
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

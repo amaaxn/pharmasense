@@ -105,10 +105,12 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
       });
       const options = resp.recommendations ?? [];
       const summary = resp.reasoning_summary ?? null;
+      const prescriptionId = resp.prescription_id ?? null;
       cacheRecommendations(options, summary);
       set({
         options,
         reasoningSummary: summary,
+        prescriptionId,
         status: "recommended",
         isLoading: false,
         isDemoMode: false,

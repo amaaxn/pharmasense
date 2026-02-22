@@ -100,6 +100,9 @@ class _InMemoryPrescriptionStore:
     def get_receipt(self, rx_id: UUID) -> PrescriptionReceipt | None:
         return self._receipts.get(rx_id)
 
+    def list_by_visit(self, visit_id: UUID) -> list[dict[str, Any]]:
+        return [rx for rx in self._prescriptions.values() if str(rx.get("visit_id")) == str(visit_id)]
+
 
 class PrescriptionService:
     """Central orchestrator for the prescription lifecycle."""
@@ -263,8 +266,9 @@ class PrescriptionService:
 
         return RecommendationResponse(
             visit_id=request.visit_id,
+            prescription_id=rx_id,
             recommendations=annotated,
-            gemini_model="gemini-1.5-flash",
+            gemini_model="gemini-flash-lite-latest",
             reasoning_summary=gemini_out.clinical_reasoning,
         )
 

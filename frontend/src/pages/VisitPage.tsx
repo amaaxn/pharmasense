@@ -40,6 +40,7 @@ export function VisitPage() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const visitStore = useVisitStore();
+  const fetchVisit = useVisitStore((s) => s.fetchVisit);
   const visit = visitStore.currentVisit;
 
   const [prescriptions, setPrescriptions] = useState<PrescriptionSummary[]>(
@@ -64,9 +65,9 @@ export function VisitPage() {
 
   useEffect(() => {
     if (visitId) {
-      visitStore.fetchVisit(visitId);
+      fetchVisit(visitId);
     }
-  }, [visitId, visitStore]);
+  }, [visitId, fetchVisit]);
 
   useEffect(() => {
     if (!visitId) return;

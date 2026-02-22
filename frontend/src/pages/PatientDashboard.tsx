@@ -245,9 +245,9 @@ function PatientProfilePage() {
         <h2 className="mb-4 text-lg font-semibold text-text-primary">
           {t.patientAllergiesTitle}
         </h2>
-        {patient && patient.allergies.length > 0 ? (
+        {patient && (patient.allergies ?? []).length > 0 ? (
           <div className="mb-4 flex flex-wrap gap-2">
-            {patient.allergies.map((allergy) => (
+            {(patient.allergies ?? []).map((allergy) => (
               <span
                 key={allergy}
                 className="inline-flex items-center gap-1.5 rounded-full bg-accent-red/10 px-3 py-1 text-sm font-medium text-accent-red"

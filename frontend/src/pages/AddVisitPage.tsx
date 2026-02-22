@@ -258,8 +258,20 @@ export function AddVisitPage() {
     const form = visitStore.form;
     notesAtRecommendation.current = notes;
     setShowReRecBanner(false);
+
+    // Ensure a visit exists before requesting recommendations
+    let visitId = visitStore.currentVisit?.id;
+    if (!visitId) {
+      try {
+        visitId = await visitStore.createVisit();
+      } catch {
+        return;
+      }
+      if (!visitId) return;
+    }
+
     await prescriptionStore.fetchRecommendations({
-      visitId: visitStore.currentVisit?.id || "",
+      visitId,
       chiefComplaint: form.chiefComplaint || notes,
       patientId: selectedPatient.patientId,
       currentMedications: form.currentMedications,
@@ -306,9 +318,9 @@ export function AddVisitPage() {
 
   // ── Part 13: Finalization logic ──
   const approvedCount = optionStates.filter((s) => s === "approved").length;
-  const allActioned =
-    optionStates.length > 0 && optionStates.every((s) => s !== "pending");
-  const canFinalize = allActioned && approvedCount > 0;
+  // Finalize is enabled as soon as at least one option is approved, regardless
+  // of whether remaining options are still pending (they are implicitly rejected)
+  const canFinalize = optionStates.length > 0 && approvedCount > 0;
 
   const handleFinalize = useCallback(async () => {
     const visitId = visitStore.currentVisit?.id;

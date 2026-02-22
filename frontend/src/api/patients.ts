@@ -10,9 +10,18 @@ export interface Patient {
   insurancePlan: string | null;
 }
 
+function normalizePatient(raw: unknown): Patient {
+  const p = raw as Record<string, unknown>;
+  return {
+    ...p,
+    allergies: Array.isArray(p.allergies) ? (p.allergies as string[]) : [],
+  } as Patient;
+}
+
 export async function listPatients(params?: { search?: string }): Promise<Patient[]> {
   const query = params?.search ? `?search=${encodeURIComponent(params.search)}` : "";
-  return await apiClient.get(`/patients${query}`) as unknown as Patient[];
+  const raw = await apiClient.get(`/patients${query}`) as unknown as unknown[];
+  return Array.isArray(raw) ? raw.map(normalizePatient) : [];
 }
 
 export async function searchPatients(query: string): Promise<Patient[]> {
@@ -20,15 +29,14 @@ export async function searchPatients(query: string): Promise<Patient[]> {
 }
 
 export async function getPatient(patientId: string): Promise<Patient> {
-  return await apiClient.get(`/patients/${patientId}`) as unknown as Patient;
+  const raw = await apiClient.get(`/patients/${patientId}`);
+  return normalizePatient(raw);
 }
 
 export async function updatePatient(
   patientId: string,
   data: Partial<Patient>,
 ): Promise<Patient> {
-  return await apiClient.put(
-    `/patients/${patientId}`,
-    data,
-  ) as unknown as Patient;
+  const raw = await apiClient.put(`/patients/${patientId}`, data);
+  return normalizePatient(raw);
 }

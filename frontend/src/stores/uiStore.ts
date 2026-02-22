@@ -44,6 +44,12 @@ export const useUiStore = create<UiState>()(
     }),
     {
       name: "pharmasense-ui",
+      version: 2,
+      migrate: (persisted: unknown) => {
+        // v1 → v2: reset language to "en" (clears any accidental "es" persisted during dev)
+        const s = persisted as Record<string, unknown>;
+        return { ...s, language: "en" };
+      },
       partialize: (state) => ({
         highContrast: state.highContrast,
         dyslexiaFont: state.dyslexiaFont,

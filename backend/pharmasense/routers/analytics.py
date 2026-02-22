@@ -9,10 +9,8 @@ from __future__ import annotations
 import logging
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from pharmasense.dependencies.auth import AuthenticatedUser, require_role
-from pharmasense.dependencies.database import get_db
 from pharmasense.schemas.analytics import (
     AnalyticsDashboardResponse,
     EventCountByType,
@@ -26,8 +24,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
 
-def _get_analytics_service(db: AsyncSession = Depends(get_db)) -> AnalyticsService:
-    return AnalyticsService(session=db)
+def _get_analytics_service() -> AnalyticsService:
+    return AnalyticsService(session=None)
 
 
 # ---------------------------------------------------------------------------

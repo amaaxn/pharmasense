@@ -45,6 +45,7 @@ class RecommendationItem(BaseModel):
 
 class RecommendationResponse(BaseModel):
     visit_id: UUID
+    prescription_id: UUID | None = None
     recommendations: list[RecommendationItem]
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-flash-lite-latest"
     reasoning_summary: str | None = None

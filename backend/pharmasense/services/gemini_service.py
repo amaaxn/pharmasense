@@ -165,7 +165,12 @@ class GeminiService:
             raise SafetyBlockError(f"Blocked by Gemini safety filter: {block_reason}")
 
         try:
-            return response["candidates"][0]["content"]["parts"][0]["text"]
+            parts = response["candidates"][0]["content"]["parts"]
+            # Thinking models may include a thought-only part first; find the text part
+            for part in parts:
+                if "text" in part and part["text"].strip():
+                    return part["text"]
+            raise RuntimeError("No text content found in Gemini response parts")
         except (KeyError, IndexError, TypeError) as exc:
             raise RuntimeError(
                 f"Unexpected Gemini response structure: {exc}"

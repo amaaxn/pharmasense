@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 _INSERT_EVENT = """\
 INSERT INTO EVENTS (ID, EVENT_TYPE, EVENT_DATA, USER_ID, SESSION_ID, CREATED_AT)
-VALUES (%s, %s, %s, %s, %s, %s)
+SELECT %s, %s, PARSE_JSON(%s), %s, %s, %s
 """
 
 _COPAY_SAVINGS_QUERY = """\

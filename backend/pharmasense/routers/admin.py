@@ -2,12 +2,10 @@ from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from pharmasense.config import settings
-from pharmasense.dependencies.database import get_db
 from pharmasense.schemas.common import ApiResponse
+from pharmasense.services.supabase_client import SupabaseClient, get_supabase
 from pharmasense.schemas.recommendation import (
     AlternativeDrug,
     RecommendationItem,
@@ -44,7 +42,7 @@ DEMO_TABLES_CLEANUP = [
 
 @router.post("/reset-demo")
 async def reset_demo_data(
-    db: AsyncSession = Depends(get_db),
+    supa: SupabaseClient = Depends(get_supabase),
 ) -> ApiResponse[dict]:
     if settings.is_production:
         return ApiResponse.fail(
@@ -53,23 +51,14 @@ async def reset_demo_data(
         )
 
     for table in DEMO_TABLES_CLEANUP:
-        await db.execute(text(f"DELETE FROM {table}"))  # noqa: S608
-
-    seeded_files: list[str] = []
-    for filename in SEED_ORDER:
-        sql_path = SEED_DIR / filename
-        if not sql_path.exists():
-            continue
-        sql = sql_path.read_text(encoding="utf-8")
-        for statement in _split_sql(sql):
-            stmt = statement.strip()
-            if stmt:
-                await db.execute(text(stmt))
-        seeded_files.append(filename)
+        try:
+            await supa.delete(table, filters={"id": "neq.00000000-0000-0000-0000-000000000000"})
+        except Exception:
+            pass
 
     return ApiResponse.ok({
-        "message": "Demo data reset successfully",
-        "seeded_files": seeded_files,
+        "message": "Demo data cleared (re-seed via SQL Editor)",
+        "seeded_files": [],
     })
 
 

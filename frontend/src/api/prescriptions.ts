@@ -134,6 +134,7 @@ export interface RecommendRequest {
 }
 
 export interface RecommendResponse {
+  prescription_id: string | null;
   recommendations: RecommendationOption[];
   reasoning_summary: string | null;
 }
