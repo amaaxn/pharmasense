@@ -105,17 +105,20 @@ def upgrade() -> None:
     op.create_table(
         "formulary_entries",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("drug_name", sa.String(200), nullable=False, unique=True),
-        sa.Column("generic_name", sa.String(200), nullable=False),
+        sa.Column("plan_name", sa.String(200), nullable=False, server_default=""),
+        sa.Column("medication_name", sa.String(200), nullable=False),
+        sa.Column("generic_name", sa.String(200), nullable=False, server_default=""),
         sa.Column("tier", sa.Integer, nullable=False),
-        sa.Column("copay_min", sa.Numeric(10, 2), nullable=False, server_default="0"),
-        sa.Column("copay_max", sa.Numeric(10, 2), nullable=False, server_default="0"),
-        sa.Column("requires_prior_auth", sa.Boolean, nullable=False, server_default="false"),
-        sa.Column("is_covered", sa.Boolean, nullable=False, server_default="true"),
-        sa.Column("notes", sa.Text, nullable=True),
+        sa.Column("copay", sa.Numeric(10, 2), nullable=False, server_default="0"),
+        sa.Column("covered", sa.Boolean, nullable=False, server_default="true"),
+        sa.Column("prior_auth_required", sa.Boolean, nullable=False, server_default="false"),
+        sa.Column("quantity_limit", sa.String(200), nullable=False, server_default=""),
+        sa.Column("step_therapy_required", sa.Boolean, nullable=False, server_default="false"),
+        sa.Column("alternatives_json", JSONB, nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
+    op.create_index("ix_formulary_entries_plan_name", "formulary_entries", ["plan_name"])
+    op.create_index("ix_formulary_entries_medication_name", "formulary_entries", ["medication_name"])
 
     # ── drug_interactions ────────────────────────────────────────────
     op.create_table(
@@ -125,9 +128,38 @@ def upgrade() -> None:
         sa.Column("drug_b", sa.String(200), nullable=False),
         sa.Column("severity", sa.String(20), nullable=False),
         sa.Column("description", sa.Text, nullable=False),
+        sa.Column("source", sa.Text, nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.UniqueConstraint("drug_a", "drug_b", name="uq_drug_interaction_pair"),
     )
+
+    # ── dose_ranges ──────────────────────────────────────────────────
+    op.create_table(
+        "dose_ranges",
+        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
+        sa.Column("medication_name", sa.String(200), nullable=False),
+        sa.Column("min_dose_mg", sa.Float, nullable=False),
+        sa.Column("max_dose_mg", sa.Float, nullable=False),
+        sa.Column("unit", sa.String(20), nullable=False, server_default="mg"),
+        sa.Column("frequency", sa.String(50), nullable=False, server_default="once daily"),
+        sa.Column("population", sa.String(50), nullable=False, server_default="adult"),
+        sa.Column("source", sa.Text, nullable=True),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    )
+
+    # ── safety_checks ────────────────────────────────────────────────
+    op.create_table(
+        "safety_checks",
+        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
+        sa.Column("prescription_id", UUID(as_uuid=True), sa.ForeignKey("prescriptions.id"), nullable=False),
+        sa.Column("check_type", sa.String(50), nullable=False),
+        sa.Column("status", sa.String(20), nullable=False),
+        sa.Column("medication_name", sa.String(200), nullable=False),
+        sa.Column("details", sa.Text, nullable=False, server_default=""),
+        sa.Column("blocking", sa.Boolean, nullable=False, server_default="false"),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    )
+    op.create_index("ix_safety_checks_prescription_id", "safety_checks", ["prescription_id"])
 
     # ── analytics_events ─────────────────────────────────────────────
     op.create_table(
@@ -145,6 +177,8 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("analytics_events")
+    op.drop_table("safety_checks")
+    op.drop_table("dose_ranges")
     op.drop_table("drug_interactions")
     op.drop_table("formulary_entries")
     op.drop_table("prescription_items")

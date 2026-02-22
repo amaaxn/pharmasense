@@ -21,8 +21,9 @@ router = APIRouter(prefix="/api", tags=["chat"])
 
 
 def _get_gemini_service() -> GeminiService:
-    """Placeholder dependency — overridden in ``main.py`` with real wiring."""
-    raise NotImplementedError("GeminiService dependency not configured")
+    from pharmasense.config import settings
+
+    return GeminiService(settings)
 
 
 async def _get_visit_context(visit_id: str) -> dict[str, Any]:

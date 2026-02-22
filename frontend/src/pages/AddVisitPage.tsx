@@ -459,6 +459,7 @@ export function AddVisitPage() {
                 selectedIndex={prescriptionStore.selectedOptionIndex}
                 hasPatient={!!selectedPatient}
                 hasNotes={notes.length > 0}
+                isDemoMode={prescriptionStore.isDemoMode}
               />
             </Card>
           </div>

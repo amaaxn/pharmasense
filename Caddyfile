@@ -1,0 +1,45 @@
+# =============================================================================
+# PharmaSense — Caddy reverse proxy with automatic SSL (Part 6 §5.4)
+#
+# Replace {$DOMAIN} with your actual domain, or set the DOMAIN env var.
+# For local testing without a domain, use `:80` instead.
+# Caddy automatically provisions and renews Let's Encrypt certificates.
+# =============================================================================
+
+{$DOMAIN:localhost} {
+	# Proxy all /api/* requests to the FastAPI backend
+	handle /api/* {
+		reverse_proxy pharmasense:8080
+	}
+
+	# Proxy health check
+	handle /docs* {
+		reverse_proxy pharmasense:8080
+	}
+
+	handle /openapi.json {
+		reverse_proxy pharmasense:8080
+	}
+
+	# Everything else → the FastAPI static files (built frontend)
+	handle {
+		reverse_proxy pharmasense:8080
+	}
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# Gzip compression
+	encode gzip
+
+	# Access logging
+	log {
+		output stdout
+		format console
+	}
+}

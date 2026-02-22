@@ -6,6 +6,12 @@ import {
   getReceipt as apiGetReceipt,
   generatePatientPack as apiGeneratePatientPack,
 } from "../api/prescriptions";
+import {
+  cacheRecommendations,
+  getCachedRecommendations,
+  DEMO_RECOMMENDATIONS,
+  DEMO_REASONING_SUMMARY,
+} from "../lib/demoFallback";
 
 // Re-export types from api/prescriptions so existing consumers don't break
 export type {
@@ -59,6 +65,7 @@ interface PrescriptionState {
   patientPack: PatientPack | null;
   isLoading: boolean;
   error: string | null;
+  isDemoMode: boolean;
 
   fetchRecommendations: (req: RecommendationRequest) => Promise<void>;
   selectOption: (index: number) => void;
@@ -83,9 +90,10 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
   patientPack: null,
   isLoading: false,
   error: null,
+  isDemoMode: false,
 
   fetchRecommendations: async (req) => {
-    set({ isLoading: true, error: null, status: "loading", options: [] });
+    set({ isLoading: true, error: null, status: "loading", options: [], isDemoMode: false });
     try {
       const resp = await apiRecommend({
         visit_id: req.visitId,
@@ -95,14 +103,35 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
         allergies: req.allergies,
         notes: req.notes,
       });
+      const options = resp.recommendations ?? [];
+      const summary = resp.reasoning_summary ?? null;
+      cacheRecommendations(options, summary);
       set({
-        options: resp.recommendations ?? [],
-        reasoningSummary: resp.reasoning_summary ?? null,
+        options,
+        reasoningSummary: summary,
         status: "recommended",
         isLoading: false,
+        isDemoMode: false,
       });
-    } catch (err) {
-      set({ error: (err as Error).message, isLoading: false, status: "idle" });
+    } catch {
+      const cached = getCachedRecommendations();
+      if (cached) {
+        set({
+          options: cached.options,
+          reasoningSummary: cached.reasoningSummary,
+          status: "recommended",
+          isLoading: false,
+          isDemoMode: true,
+        });
+      } else {
+        set({
+          options: DEMO_RECOMMENDATIONS,
+          reasoningSummary: DEMO_REASONING_SUMMARY,
+          status: "recommended",
+          isLoading: false,
+          isDemoMode: true,
+        });
+      }
     }
   },
 
@@ -184,6 +213,7 @@ export const usePrescriptionStore = create<PrescriptionState>()((set) => ({
       patientPack: null,
       isLoading: false,
       error: null,
+      isDemoMode: false,
     });
   },
 }));

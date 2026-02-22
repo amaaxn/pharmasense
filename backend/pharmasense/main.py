@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from pharmasense.config import settings
 from pharmasense.exceptions import register_exception_handlers
-from pharmasense.routers import health, auth, patients, clinicians, visits, prescriptions, ocr, chat, voice, analytics
+from pharmasense.routers import health, auth, patients, clinicians, visits, prescriptions, ocr, chat, voice, analytics, admin
 
 
 @asynccontextmanager
@@ -42,6 +42,7 @@ app.include_router(ocr.router)
 app.include_router(chat.router)
 app.include_router(voice.router)
 app.include_router(analytics.router)
+app.include_router(admin.router)
 
 static_dir = Path(__file__).parent.parent / "static"
 if static_dir.is_dir():

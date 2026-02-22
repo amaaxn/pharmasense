@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Routes, Route, Navigate, Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useAuthStore } from "../stores/authStore";
 import { useVisitStore } from "../stores/visitStore";
 import { useTranslation } from "../i18n";
 import { listPatients, type Patient } from "../api/patients";
+import { resetDemoData } from "../api/admin";
 import {
   Card,
   Avatar,
@@ -15,7 +16,6 @@ import {
   EmptyState,
 } from "../shared";
 import { PageTransition } from "../components/PageTransition";
-import { useState } from "react";
 import { AddVisitPage } from "./AddVisitPage";
 
 function ClinicianHomePage() {
@@ -26,6 +26,9 @@ function ClinicianHomePage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsError, setPatientsError] = useState<string | null>(null);
+
+  const [resetting, setResetting] = useState(false);
+  const [resetResult, setResetResult] = useState<string | null>(null);
 
   useEffect(() => {
     fetchVisits({ limit: 10 });
@@ -51,6 +54,30 @@ function ClinicianHomePage() {
   }, [patients]);
 
   const isLoading = visitsLoading || patientsLoading;
+
+  const handleResetDemo = useCallback(async () => {
+    if (!window.confirm("This will delete all existing data and re-seed with demo data. Continue?")) {
+      return;
+    }
+    setResetting(true);
+    setResetResult(null);
+    try {
+      const result = await resetDemoData();
+      setResetResult(result.message);
+      fetchVisits({ limit: 10 });
+      setPatientsLoading(true);
+      listPatients()
+        .then((data) => {
+          setPatients(data);
+          setPatientsLoading(false);
+        })
+        .catch(() => setPatientsLoading(false));
+    } catch (err) {
+      setResetResult(`Reset failed: ${(err as Error).message}`);
+    } finally {
+      setResetting(false);
+    }
+  }, [fetchVisits]);
 
   return (
     <PageTransition>
@@ -202,6 +229,22 @@ function ClinicianHomePage() {
             </div>
           </div>
         )}
+
+        {/* Reset Demo Data — visible in non-production */}
+        <div className="mt-12 flex flex-col items-center gap-2 border-t border-border-default pt-6">
+          {resetResult && (
+            <p className="text-sm text-text-secondary">{resetResult}</p>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            loading={resetting}
+            onClick={handleResetDemo}
+            className="text-xs text-text-tertiary"
+          >
+            Reset Demo Data
+          </Button>
+        </div>
       </div>
     </PageTransition>
   );

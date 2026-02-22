@@ -23,20 +23,34 @@ class VoiceService:
     def __init__(self) -> None:
         self._api_key = os.getenv("ELEVENLABS_API_KEY", "")
         self._voice_id = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
+        self._fallback_url = os.getenv("DEMO_VOICE_FALLBACK_URL", "")
         self._storage = StorageService()
         self._analytics = AnalyticsService()
+        self._last_successful_url: str | None = None
 
     async def generate_voice_pack(self, request: VoiceRequest) -> VoiceResponse:
         script = await self._build_voice_script(request)
         audio_bytes = await self._call_elevenlabs(script, request.language or "en")
 
-        key = self._storage.generate_key("voice-packs", "mp3")
-        audio_url = await self._storage.upload(audio_bytes, key)
+        is_silent_fallback = audio_bytes == SILENT_MP3
+
+        if is_silent_fallback and self._fallback_url:
+            logger.info("Using pre-generated demo voice fallback URL")
+            audio_url = self._fallback_url
+        elif is_silent_fallback and self._last_successful_url:
+            logger.info("Using last successful voice URL as fallback")
+            audio_url = self._last_successful_url
+        else:
+            key = self._storage.generate_key("voice", "mp3")
+            audio_url = await self._storage.upload(audio_bytes, key)
+            if not is_silent_fallback:
+                self._last_successful_url = audio_url
 
         logger.info(
-            "Voice pack generated for prescription %s (%d bytes)",
+            "Voice pack generated for prescription %s (%d bytes, fallback=%s)",
             request.prescription_id,
             len(audio_bytes),
+            is_silent_fallback,
         )
 
         self._analytics.emit(

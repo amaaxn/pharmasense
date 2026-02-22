@@ -1,0 +1,41 @@
+services:
+  pharmasense:
+    container_name: pharmasense-app
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    expose:
+      - "8080"
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    restart: unless-stopped
+    volumes:
+      - app-data:/app/data
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: pharmasense-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      pharmasense:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:

@@ -2,6 +2,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # Application
+    environment: str = "development"
+    cors_origins: list[str] = ["http://localhost:3000"]
+
     # Database
     database_url: str = "postgresql+asyncpg://localhost:5432/pharmasense"
 
@@ -32,6 +36,15 @@ class Settings(BaseSettings):
     snowflake_database: str = "PHARMASENSE"
     snowflake_schema: str = "ANALYTICS"
     snowflake_warehouse: str = "COMPUTE_WH"
+    snowflake_role: str = "SYSADMIN"
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment.lower() == "production"
+
+    @property
+    def snowflake_configured(self) -> bool:
+        return bool(self.snowflake_account and self.snowflake_user and self.snowflake_password)
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

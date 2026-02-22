@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { generateVoicePack } from "../../api/voice";
+import { getVoiceFallbackUrl, setVoiceFallbackUrl } from "../../lib/demoFallback";
 import { useTranslation } from "../../i18n/useTranslation";
 import type { PatientPack as PatientPackType } from "../../types/models";
 import { AvoidList } from "./AvoidList";
@@ -26,6 +27,12 @@ export function PatientPack({ pack, prescriptionId }: PatientPackProps) {
         language: lang,
       });
       setAudioUrl(resp.audioUrl);
+      setVoiceFallbackUrl(resp.audioUrl);
+    } catch {
+      const fallback = getVoiceFallbackUrl();
+      if (fallback) {
+        setAudioUrl(fallback);
+      }
     } finally {
       setIsGeneratingVoice(false);
     }
@@ -40,6 +47,12 @@ export function PatientPack({ pack, prescriptionId }: PatientPackProps) {
           language: targetLang,
         });
         setAudioUrl(resp.audioUrl);
+        setVoiceFallbackUrl(resp.audioUrl);
+      } catch {
+        const fallback = getVoiceFallbackUrl();
+        if (fallback) {
+          setAudioUrl(fallback);
+        }
       } finally {
         setIsGeneratingVoice(false);
       }

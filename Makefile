@@ -55,17 +55,23 @@ logs: ## Tail Docker Compose logs
 # ── 9.3 Seed Data Loading ────────────────────────────────────────────
 
 .PHONY: seed
-seed: ## Load seed data into the database (requires DATABASE_URL in .env)
-	@echo "Loading formulary data…"
-	psql "$$(grep '^DATABASE_URL=' .env | cut -d= -f2- | sed 's|postgresql+asyncpg://|postgresql://|')" \
-		-f $(BACKEND_DIR)/seed/seed-formulary.sql
-	@echo "Loading drug interactions…"
-	psql "$$(grep '^DATABASE_URL=' .env | cut -d= -f2- | sed 's|postgresql+asyncpg://|postgresql://|')" \
-		-f $(BACKEND_DIR)/seed/seed-interactions.sql
-	@echo "Loading demo patients…"
-	psql "$$(grep '^DATABASE_URL=' .env | cut -d= -f2- | sed 's|postgresql+asyncpg://|postgresql://|')" \
-		-f $(BACKEND_DIR)/seed/seed-demo-patients.sql
-	@echo "Seed data loaded."
+seed: ## Load all seed data into the database (requires DATABASE_URL in .env)
+	@DB_URL=$$(grep '^DATABASE_URL=' .env | cut -d= -f2- | sed 's|postgresql+asyncpg://|postgresql://|'); \
+	echo "Loading formulary…"; \
+	psql "$$DB_URL" -f $(BACKEND_DIR)/seed/seed-formulary.sql; \
+	echo "Loading drug interactions…"; \
+	psql "$$DB_URL" -f $(BACKEND_DIR)/seed/seed-interactions.sql; \
+	echo "Loading dose ranges…"; \
+	psql "$$DB_URL" -f $(BACKEND_DIR)/seed/seed-dose-ranges.sql; \
+	echo "Loading demo clinician…"; \
+	psql "$$DB_URL" -f $(BACKEND_DIR)/seed/seed-demo-clinician.sql; \
+	echo "Loading demo patients…"; \
+	psql "$$DB_URL" -f $(BACKEND_DIR)/seed/seed-demo-patients.sql; \
+	echo "Loading demo visits…"; \
+	psql "$$DB_URL" -f $(BACKEND_DIR)/seed/seed-demo-visits.sql; \
+	echo "Loading analytics events…"; \
+	psql "$$DB_URL" -f $(BACKEND_DIR)/seed/seed-analytics-events.sql; \
+	echo "All seed data loaded."
 
 # ── Migrations ────────────────────────────────────────────────────────
 

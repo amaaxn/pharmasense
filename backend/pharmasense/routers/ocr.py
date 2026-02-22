@@ -20,8 +20,10 @@ router = APIRouter(prefix="/api", tags=["ocr"])
 
 
 def _get_ocr_service() -> OcrService:
-    """Placeholder dependency — overridden in ``main.py`` with real wiring."""
-    raise NotImplementedError("OcrService dependency not configured")
+    from pharmasense.config import settings
+    from pharmasense.services.gemini_service import GeminiService
+
+    return OcrService(GeminiService(settings))
 
 
 @router.post("/ocr", response_model=ApiResponse[OcrResponse])

@@ -7,17 +7,24 @@ the standard ``ApiResponse`` envelope.
 from __future__ import annotations
 
 import logging
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from pharmasense.config import settings
+from pharmasense.dependencies.database import get_db
 from pharmasense.exceptions import (
     ResourceNotFoundError,
     SafetyBlockError,
     ValidationError,
 )
+from pharmasense.models import DrugInteraction, DoseRange, FormularyEntry
 from pharmasense.schemas.common import ApiResponse
+from pharmasense.schemas.formulary_service import FormularyEntryData
 from pharmasense.schemas.gemini import PatientInstructionsOutput
 from pharmasense.schemas.prescription_ops import (
     PrescriptionApprovalRequest,
@@ -28,23 +35,96 @@ from pharmasense.schemas.recommendation import (
     RecommendationRequest,
     RecommendationResponse,
 )
+from pharmasense.schemas.rules_engine import DoseRangeData, DrugInteractionData
 from pharmasense.schemas.validation import (
     ValidationRequest,
     ValidationResponse,
 )
+from pharmasense.services.analytics_service import AnalyticsService
+from pharmasense.services.formulary_service import FormularyService
+from pharmasense.services.gemini_service import GeminiService
 from pharmasense.services.prescription_service import PrescriptionService
+from pharmasense.services.rules_engine_service import RulesEngineService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/prescriptions", tags=["prescriptions"])
 
+_gemini = GeminiService(settings)
+_rules = RulesEngineService()
+_formulary_svc = FormularyService()
 
-# ---------------------------------------------------------------------------
-# Dependency placeholder — overridden in ``main.py`` with real wiring
-# ---------------------------------------------------------------------------
+_shared_store: Any = None
 
-def _get_prescription_service() -> PrescriptionService:
-    raise NotImplementedError("PrescriptionService dependency not configured")
+
+def _get_shared_store():
+    from pharmasense.services.prescription_service import _InMemoryPrescriptionStore
+
+    global _shared_store
+    if _shared_store is None:
+        _shared_store = _InMemoryPrescriptionStore()
+    return _shared_store
+
+
+def _get_prescription_service(
+    db: AsyncSession = Depends(get_db),
+) -> PrescriptionService:
+    analytics = AnalyticsService(session=db)
+    return PrescriptionService(
+        gemini_service=_gemini,
+        rules_engine=_rules,
+        formulary_service=_formulary_svc,
+        analytics_service=analytics,
+        store=_get_shared_store(),
+    )
+
+
+async def _load_formulary(db: AsyncSession) -> list[FormularyEntryData]:
+    result = await db.execute(select(FormularyEntry))
+    rows = result.scalars().all()
+    return [
+        FormularyEntryData(
+            drug_name=row.medication_name,
+            generic_name=row.generic_name,
+            plan_name=row.plan_name,
+            tier=row.tier,
+            copay=float(row.copay),
+            is_covered=row.covered,
+            requires_prior_auth=row.prior_auth_required,
+            quantity_limit=row.quantity_limit,
+            step_therapy_required=row.step_therapy_required,
+        )
+        for row in rows
+    ]
+
+
+async def _load_interactions(db: AsyncSession) -> list[DrugInteractionData]:
+    result = await db.execute(select(DrugInteraction))
+    rows = result.scalars().all()
+    return [
+        DrugInteractionData(
+            drug_a=row.drug_a,
+            drug_b=row.drug_b,
+            severity=row.severity,
+            description=row.description,
+        )
+        for row in rows
+    ]
+
+
+async def _load_dose_ranges(db: AsyncSession) -> list[DoseRangeData]:
+    result = await db.execute(select(DoseRange))
+    rows = result.scalars().all()
+    return [
+        DoseRangeData(
+            medication_name=row.medication_name,
+            min_dose_mg=row.min_dose_mg,
+            max_dose_mg=row.max_dose_mg,
+            unit=row.unit,
+            frequency=row.frequency,
+        )
+        for row in rows
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -55,10 +135,19 @@ def _get_prescription_service() -> PrescriptionService:
 async def recommend(
     request: RecommendationRequest,
     svc: PrescriptionService = Depends(_get_prescription_service),
+    db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[RecommendationResponse]:
     logger.info("Recommendation request for visit %s", request.visit_id)
     try:
-        result = await svc.generate_recommendations(request)
+        formulary = await _load_formulary(db)
+        interactions = await _load_interactions(db)
+        dose_ranges = await _load_dose_ranges(db)
+        result = await svc.generate_recommendations(
+            request,
+            formulary=formulary,
+            drug_interactions=interactions,
+            dose_ranges=dose_ranges,
+        )
         return ApiResponse(success=True, data=result)
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -72,10 +161,19 @@ async def recommend(
 async def validate(
     request: ValidationRequest,
     svc: PrescriptionService = Depends(_get_prescription_service),
+    db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[ValidationResponse]:
     logger.info("Validation request for visit %s", request.visit_id)
     try:
-        result = await svc.validate_prescriptions(request)
+        formulary = await _load_formulary(db)
+        interactions = await _load_interactions(db)
+        dose_ranges = await _load_dose_ranges(db)
+        result = await svc.validate_prescriptions(
+            request,
+            drug_interactions=interactions,
+            dose_ranges=dose_ranges,
+            formulary=formulary,
+        )
         return ApiResponse(success=True, data=result)
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -16,6 +16,7 @@ export interface RecommendationPanelProps {
   selectedIndex?: number | null;
   hasPatient: boolean;
   hasNotes: boolean;
+  isDemoMode?: boolean;
 }
 
 export function RecommendationPanel({
@@ -30,6 +31,7 @@ export function RecommendationPanel({
   selectedIndex,
   hasPatient,
   hasNotes,
+  isDemoMode = false,
 }: RecommendationPanelProps) {
   const { t } = useTranslation();
   const announcerRef = useRef<HTMLDivElement>(null);
@@ -110,6 +112,16 @@ export function RecommendationPanel({
   return (
     <>
       <Announcer ref={announcerRef} />
+      {isDemoMode && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-accent-amber/40 bg-accent-amber/10 px-3 py-2">
+          <span className="inline-flex items-center rounded-full bg-accent-amber/20 px-2 py-0.5 text-xs font-semibold text-accent-amber">
+            Demo mode
+          </span>
+          <span className="text-xs text-text-secondary">
+            Showing cached recommendations — AI service unavailable
+          </span>
+        </div>
+      )}
       <ThreeLaneReview
         options={recommendations}
         onApprove={onApprove}
