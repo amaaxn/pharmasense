@@ -111,7 +111,7 @@ function PatientProfilePage() {
     patientsApi.getPatient(user.userId).then(setPatient).catch(() => setError("Failed to load profile")).finally(() => setLoading(false));
 
     visitsApi.listVisits().then(async (visits) => {
-      const inProgress = visits.filter((v) => v.status === "in_progress" || v.status === "scheduled");
+      const inProgress = visits.filter((v) => v.status === "in_progress");
       setUpcomingVisits(inProgress.length);
 
       let rxCount = 0;

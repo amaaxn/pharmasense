@@ -17,10 +17,10 @@ interface VoiceChatPanelProps {
   onClose: () => void;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const SpeechRecognitionAPI =
   typeof window !== "undefined"
-    ? (window as unknown as Record<string, unknown>).SpeechRecognition ??
-      (window as unknown as Record<string, unknown>).webkitSpeechRecognition
+    ? (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition
     : null;
 
 export function VoiceChatPanel({ visitId, onClose }: VoiceChatPanelProps) {
@@ -29,7 +29,7 @@ export function VoiceChatPanel({ visitId, onClose }: VoiceChatPanelProps) {
   const [interim, setInterim] = useState("");
   const [supported] = useState(() => !!SpeechRecognitionAPI);
 
-  const recognitionRef = useRef<InstanceType<typeof SpeechRecognition> | null>(null);
+  const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const historyRef = useRef<ChatMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -131,12 +131,12 @@ export function VoiceChatPanel({ visitId, onClose }: VoiceChatPanelProps) {
       audioRef.current = null;
     }
 
-    const recognition = new (SpeechRecognitionAPI as typeof SpeechRecognition)();
+    const recognition = new (SpeechRecognitionAPI as any)();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = "en-US";
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: any) => {
       let finalText = "";
       let interimText = "";
       for (let i = 0; i < event.results.length; i++) {
@@ -154,7 +154,7 @@ export function VoiceChatPanel({ visitId, onClose }: VoiceChatPanelProps) {
       }
     };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    recognition.onerror = (event: any) => {
       if (event.error !== "aborted" && event.error !== "no-speech") {
         console.error("SpeechRecognition error:", event.error);
       }

@@ -40,6 +40,14 @@ spec:
           value: '["https://pharmasense.com"]'
           scope: RUN_TIME
 
+        # ── Frontend build args (Vite inlines these at build time) ──
+        - key: VITE_SUPABASE_URL
+          type: SECRET
+          scope: BUILD_TIME
+        - key: VITE_SUPABASE_ANON_KEY
+          type: SECRET
+          scope: BUILD_TIME
+
         # ── Secrets (set values in DO console, not here) ──
         - key: DATABASE_URL
           type: SECRET

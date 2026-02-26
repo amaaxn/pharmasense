@@ -6,7 +6,7 @@
 -- ============================================================
 INSERT INTO visits (id, patient_id, clinician_id, status, chief_complaint, notes, created_at)
 VALUES (
-    'v1111111-1111-1111-1111-111111111111',
+    'b1111111-1111-1111-1111-111111111111',
     'a1111111-1111-1111-1111-111111111111',
     'c1111111-1111-1111-1111-111111111111',
     'completed',
@@ -17,8 +17,8 @@ VALUES (
 
 INSERT INTO prescriptions (id, visit_id, patient_id, clinician_id, status, approved_at, created_at)
 VALUES (
-    'p1111111-1111-1111-1111-111111111111',
-    'v1111111-1111-1111-1111-111111111111',
+    'd1111111-1111-1111-1111-111111111111',
+    'b1111111-1111-1111-1111-111111111111',
     'a1111111-1111-1111-1111-111111111111',
     'c1111111-1111-1111-1111-111111111111',
     'approved',
@@ -28,8 +28,8 @@ VALUES (
 
 INSERT INTO prescription_items (id, prescription_id, drug_name, generic_name, dosage, frequency, duration, tier, copay, is_covered)
 VALUES (
-    'pi111111-1111-1111-1111-111111111111',
-    'p1111111-1111-1111-1111-111111111111',
+    'de111111-1111-1111-1111-111111111111',
+    'd1111111-1111-1111-1111-111111111111',
     'Azithromycin', 'azithromycin',
     '250mg', 'once daily', '5 days',
     1, 10.00, TRUE
@@ -40,7 +40,7 @@ VALUES (
 -- ============================================================
 INSERT INTO visits (id, patient_id, clinician_id, status, chief_complaint, notes, created_at)
 VALUES (
-    'v2222222-2222-2222-2222-222222222222',
+    'b2222222-2222-2222-2222-222222222222',
     'a2222222-2222-2222-2222-222222222222',
     'c1111111-1111-1111-1111-111111111111',
     'completed',
@@ -51,8 +51,8 @@ VALUES (
 
 INSERT INTO prescriptions (id, visit_id, patient_id, clinician_id, status, approved_at, created_at)
 VALUES (
-    'p2222222-2222-2222-2222-222222222222',
-    'v2222222-2222-2222-2222-222222222222',
+    'd2222222-2222-2222-2222-222222222222',
+    'b2222222-2222-2222-2222-222222222222',
     'a2222222-2222-2222-2222-222222222222',
     'c1111111-1111-1111-1111-111111111111',
     'approved',
@@ -62,8 +62,8 @@ VALUES (
 
 INSERT INTO prescription_items (id, prescription_id, drug_name, generic_name, dosage, frequency, duration, tier, copay, is_covered)
 VALUES (
-    'pi222222-2222-2222-2222-222222222222',
-    'p2222222-2222-2222-2222-222222222222',
+    'de222222-2222-2222-2222-222222222222',
+    'd2222222-2222-2222-2222-222222222222',
     'Jardiance', 'empagliflozin',
     '25mg', 'once daily', '90 days',
     3, 65.00, TRUE
@@ -74,7 +74,7 @@ VALUES (
 -- ============================================================
 INSERT INTO visits (id, patient_id, clinician_id, status, chief_complaint, notes, created_at)
 VALUES (
-    'v3333333-3333-3333-3333-333333333333',
+    'b3333333-3333-3333-3333-333333333333',
     'a3333333-3333-3333-3333-333333333333',
     'c1111111-1111-1111-1111-111111111111',
     'completed',
@@ -85,8 +85,8 @@ VALUES (
 
 INSERT INTO prescriptions (id, visit_id, patient_id, clinician_id, status, approved_at, created_at)
 VALUES (
-    'p3333333-3333-3333-3333-333333333333',
-    'v3333333-3333-3333-3333-333333333333',
+    'd3333333-3333-3333-3333-333333333333',
+    'b3333333-3333-3333-3333-333333333333',
     'a3333333-3333-3333-3333-333333333333',
     'c1111111-1111-1111-1111-111111111111',
     'approved',
@@ -96,8 +96,8 @@ VALUES (
 
 INSERT INTO prescription_items (id, prescription_id, drug_name, generic_name, dosage, frequency, duration, tier, copay, is_covered)
 VALUES (
-    'pi333333-3333-3333-3333-333333333333',
-    'p3333333-3333-3333-3333-333333333333',
+    'de333333-3333-3333-3333-333333333333',
+    'd3333333-3333-3333-3333-333333333333',
     'Omeprazole', 'omeprazole',
     '20mg', 'once daily', '14 days',
     1, 8.00, TRUE

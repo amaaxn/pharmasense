@@ -13,6 +13,12 @@ FROM node:20-alpine AS frontend
 
 WORKDIR /frontend
 
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm ci --ignore-scripts
 
@@ -31,7 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY backend/pyproject.toml ./
 COPY backend/pharmasense/ ./pharmasense/
 
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir --default-timeout=120 --upgrade pip && \
+    pip install --no-cache-dir --default-timeout=120 .
 
 # ── Stage 3: Final production image ──────────────────────────────────────────
 FROM python:3.11-slim

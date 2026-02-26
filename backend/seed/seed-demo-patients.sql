@@ -6,7 +6,7 @@
 INSERT INTO patients (id, user_id, first_name, last_name, date_of_birth, allergies, current_medications, insurance_plan, insurance_member_id, medical_history)
 VALUES (
     'a1111111-1111-1111-1111-111111111111',
-    'u1111111-1111-1111-1111-111111111111',
+    'f1111111-1111-1111-1111-111111111111',
     'Maria', 'Lopez',
     '1985-03-15',
     '["Penicillin", "Sulfa drugs"]',
@@ -27,7 +27,7 @@ VALUES (
 INSERT INTO patients (id, user_id, first_name, last_name, date_of_birth, allergies, current_medications, insurance_plan, insurance_member_id, medical_history)
 VALUES (
     'a2222222-2222-2222-2222-222222222222',
-    'u2222222-2222-2222-2222-222222222222',
+    'f2222222-2222-2222-2222-222222222222',
     'James', 'Chen',
     '1958-11-02',
     '[]',
@@ -48,7 +48,7 @@ VALUES (
 INSERT INTO patients (id, user_id, first_name, last_name, date_of_birth, allergies, current_medications, insurance_plan, insurance_member_id, medical_history)
 VALUES (
     'a3333333-3333-3333-3333-333333333333',
-    'u3333333-3333-3333-3333-333333333333',
+    'f3333333-3333-3333-3333-333333333333',
     'Sofia', 'Rivera',
     '1995-07-22',
     '[]',
