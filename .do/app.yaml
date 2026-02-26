@@ -15,7 +15,7 @@ spec:
   services:
     - name: pharmasense
       github:
-        repo: amaaxn/prescription-manager
+        repo: amaaxn/pharmasense
         branch: main
         deploy_on_push: true
       dockerfile_path: backend/Dockerfile
@@ -115,7 +115,7 @@ spec:
     - name: migrate
       kind: PRE_DEPLOY
       github:
-        repo: amaaxn/prescription-manager
+        repo: amaaxn/pharmasense
         branch: main
       dockerfile_path: backend/Dockerfile
       source_dir: /
